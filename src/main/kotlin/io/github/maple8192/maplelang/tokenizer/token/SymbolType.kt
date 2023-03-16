@@ -54,11 +54,6 @@ enum class SymbolType(val symbol: String) {
     End(";");
 
     companion object {
-        /**
-         * Gets the list of symbols ordered by lengths.
-         */
-        fun getLenOrderList(): List<SymbolType> {
-            return SymbolType.values().toList().sortedByDescending { it.symbol.length }
-        }
+        val lenOrderList: List<SymbolType> by lazy { SymbolType.values().toList().sortedByDescending { it.symbol.length } }
     }
 }
