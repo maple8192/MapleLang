@@ -9,8 +9,8 @@ class FileReader(private val file: File) {
     /**
      * Gets the content of the file.
      */
-    fun read(): String {
-        return file.readText()
+    fun read(): List<String> {
+        return file.readLines()
     }
 
     companion object {
