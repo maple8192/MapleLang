@@ -1,7 +1,7 @@
 package io.github.maple8192.maplelang
 
 import io.github.maple8192.maplelang.file.FileReader
-import io.github.maple8192.maplelang.tokenizer.TokenizeException
+import io.github.maple8192.maplelang.exception.TokenException
 import io.github.maple8192.maplelang.tokenizer.Tokenizer
 
 fun main(args: Array<String>) {
@@ -23,7 +23,7 @@ fun main(args: Array<String>) {
     val tokenizer = Tokenizer(src)
     val tokens = try {
         tokenizer.tokenize()
-    } catch (ex: TokenizeException) {
+    } catch (ex: TokenException) {
         println(src[ex.line])
         print(" ".repeat(ex.pos))
         println("^ ${ex.message}")

@@ -1,5 +1,6 @@
 package io.github.maple8192.maplelang.tokenizer
 
+import io.github.maple8192.maplelang.exception.TokenException
 import io.github.maple8192.maplelang.tokenizer.token.type.SymbolType
 import io.github.maple8192.maplelang.tokenizer.token.Token
 import io.github.maple8192.maplelang.tokenizer.token.type.WordType
@@ -12,7 +13,7 @@ class Tokenizer(private val src: List<String>) {
     /**
      * Tokenizes the source code.
      */
-    @Throws(TokenizeException::class)
+    @Throws(TokenException::class)
     fun tokenize(): List<Token> {
         val tokens = mutableListOf<Token>()
 
@@ -27,7 +28,7 @@ class Tokenizer(private val src: List<String>) {
                         pos += length
                     }
                     in SymbolType.symbolChars -> {
-                        val symbol = createSymbolToken(src[line].slice(pos until src[line].length)) ?: throw TokenizeException(line, pos, "Undefined Token")
+                        val symbol = createSymbolToken(src[line].slice(pos until src[line].length)) ?: throw TokenException(line, pos, "Undefined Token")
                         tokens.add(Token.Symbol(line, pos, symbol))
                         pos += symbol.symbol.length
                     }
