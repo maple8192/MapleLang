@@ -1,5 +1,8 @@
 package io.github.maple8192.maplelang.tokenizer.token
 
+import io.github.maple8192.maplelang.tokenizer.token.type.SymbolType
+import io.github.maple8192.maplelang.tokenizer.token.type.WordType
+
 /**
  * This class represents a token.
  */

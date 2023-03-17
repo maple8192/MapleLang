@@ -1,4 +1,4 @@
-package io.github.maple8192.maplelang.tokenizer.token
+package io.github.maple8192.maplelang.tokenizer.token.type
 
 /**
  * This class represents a word token type.

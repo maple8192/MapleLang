@@ -1,8 +1,8 @@
 package io.github.maple8192.maplelang.tokenizer
 
-import io.github.maple8192.maplelang.tokenizer.token.SymbolType
+import io.github.maple8192.maplelang.tokenizer.token.type.SymbolType
 import io.github.maple8192.maplelang.tokenizer.token.Token
-import io.github.maple8192.maplelang.tokenizer.token.WordType
+import io.github.maple8192.maplelang.tokenizer.token.type.WordType
 import io.github.maple8192.maplelang.util.Either
 
 /**
