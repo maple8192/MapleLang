@@ -47,6 +47,8 @@ class Tokenizer(private val src: List<String>) {
             }
         }
 
+        tokens.add(Token.Eof(src.lastIndex, src[src.lastIndex].length))
+
         return tokens.toList()
     }
 
