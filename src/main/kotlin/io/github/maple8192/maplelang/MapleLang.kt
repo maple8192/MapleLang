@@ -1,6 +1,7 @@
 package io.github.maple8192.maplelang
 
 import io.github.maple8192.maplelang.file.FileReader
+import io.github.maple8192.maplelang.tokenizer.TokenizeException
 import io.github.maple8192.maplelang.tokenizer.Tokenizer
 
 fun main(args: Array<String>) {
@@ -20,9 +21,12 @@ fun main(args: Array<String>) {
 
     // トークナイズ
     val tokenizer = Tokenizer(src)
-    val tokens = tokenizer.tokenize()
-    if (tokens == null) {
-        println("Error occurred while tokenizing.")
+    val tokens = try {
+        tokenizer.tokenize()
+    } catch (ex: TokenizeException) {
+        println(src[ex.line])
+        print(" ".repeat(ex.pos))
+        println("^ ${ex.message}")
         return
     }
 

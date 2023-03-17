@@ -12,7 +12,8 @@ class Tokenizer(private val src: List<String>) {
     /**
      * Tokenizes the source code.
      */
-    fun tokenize(): List<Token>? {
+    @Throws(TokenizeException::class)
+    fun tokenize(): List<Token> {
         val tokens = mutableListOf<Token>()
 
         for (line in src.indices) {
@@ -26,7 +27,7 @@ class Tokenizer(private val src: List<String>) {
                         pos += length
                     }
                     in SymbolType.symbolChars -> {
-                        val symbol = createSymbolToken(src[line].slice(pos until src[line].length)) ?: return null
+                        val symbol = createSymbolToken(src[line].slice(pos until src[line].length)) ?: throw TokenizeException(line, pos, "Undefined Token")
                         tokens.add(Token.Symbol(line, pos, symbol))
                         pos += symbol.symbol.length
                     }
