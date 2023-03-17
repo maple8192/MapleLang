@@ -1,6 +1,7 @@
 package io.github.maple8192.maplelang
 
 import io.github.maple8192.maplelang.file.FileReader
+import io.github.maple8192.maplelang.tokenizer.Tokenizer
 
 fun main(args: Array<String>) {
     // 引数の数をチェック
@@ -17,6 +18,14 @@ fun main(args: Array<String>) {
     }
     val src = reader.read()
 
-    // debug ソースファイルの中身を表示
-    println(src)
+    // トークナイズ
+    val tokenizer = Tokenizer(src)
+    val tokens = tokenizer.tokenize()
+    if (tokens == null) {
+        println("Error occurred while tokenizing.")
+        return
+    }
+
+    // debug 結果を表示
+    println(tokens)
 }
