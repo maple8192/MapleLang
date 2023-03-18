@@ -386,6 +386,8 @@ class Parser(tokenList: List<Token>) {
             opCall("mul", listOf(node, powerAndRoot(variables)))
         } else if (tokens.consumeSymbol(SymbolType.Div)) {
             opCall("div", listOf(node, powerAndRoot(variables)))
+        } else if (tokens.consumeSymbol(SymbolType.Rem)) {
+            opCall("rem", listOf(node, powerAndRoot(variables)))
         } else {
             node
         }
