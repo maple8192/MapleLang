@@ -17,6 +17,16 @@ class LLVMGenerator {
     fun generate(program: Program): List<String> {
         val code = mutableListOf<String>()
 
+        try {
+            code.addAll(this.javaClass.classLoader.getResourceAsStream("default.ll")!!.bufferedReader().use { it.readLines() })
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+        }
+
+        code.add("")
+        code.add("; -------------------------------------------------------------")
+        code.add("")
+
         for (function in program.functions) {
             code.addAll(genFunction(function))
         }
@@ -27,7 +37,7 @@ class LLVMGenerator {
     private fun genFunction(function: Function): List<String> {
         val code = mutableListOf<String>()
 
-        code.add("define ${function.returnType.str} @${function.name}$${funcArgs(function.variables.take(function.argsNum))}(${genFuncArgs(function.variables.take(function.argsNum))}) {")
+        code.add("define ${function.returnType.str} @${function.name}${if (function.name != "main") "$${funcArgs(function.variables.take(function.argsNum))}" else ""}(${genFuncArgs(function.variables.take(function.argsNum))}) {")
         code.add("entry:")
         function.variables.forEachIndexed { i, t ->
             code.add("  %${i} = alloca ${t.str}")
@@ -38,6 +48,7 @@ class LLVMGenerator {
 
         code.add("  ret ${function.returnType.str}${when (function.returnType) { Type.Int -> " 0"; Type.Float -> " 0.0"; Type.Void -> "" }}")
         code.add("}")
+        code.add("")
 
         return code
     }
