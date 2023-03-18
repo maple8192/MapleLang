@@ -7,20 +7,20 @@ entry:
 define double @$add$i64_double(i64, double) {
 entry:
     %2 = sitofp i64 %0 to double
-    %3 = add double %2, %1
+    %3 = fadd double %2, %1
     ret double %3
 }
 
 define double @$add$double_i64(double, i64) {
 entry:
     %2 = sitofp i64 %1 to double
-    %3 = add double %0, %2
+    %3 = fadd double %0, %2
     ret double %3
 }
 
 define double @$add$double_double(double, double) {
 entry:
-    %2 = add double %0, %1
+    %2 = fadd double %0, %1
     ret double %2
 }
 
@@ -33,20 +33,20 @@ entry:
 define double @$sub$i64_double(i64, double) {
 entry:
     %2 = sitofp i64 %0 to double
-    %3 = sub double %2, %1
+    %3 = fsub double %2, %1
     ret double %3
 }
 
 define double @$sub$double_i64(double, i64) {
 entry:
     %2 = sitofp i64 %1 to double
-    %3 = sub double %0, %2
+    %3 = fsub double %0, %2
     ret double %3
 }
 
 define double @$sub$double_double(double, double) {
 entry:
-    %2 = sub double %0, %1
+    %2 = fsub double %0, %1
     ret double %2
 }
 
@@ -137,7 +137,7 @@ entry:
 define double @$minus$double(double) {
 entry:
     %1 = fneg double %0
-    ret i64 %1
+    ret double %1
 }
 
 define i64 @$inc$i64(i64) {
@@ -148,8 +148,8 @@ entry:
 
 define double @$inc$double(double) {
 entry:
-    %1 = add double %0, 1.0
-    ret i64 %1
+    %1 = fadd double %0, 1.0
+    ret double %1
 }
 
 define i64 @$dec$i64(i64) {
@@ -160,8 +160,8 @@ entry:
 
 define double @$dec$double(double) {
 entry:
-    %1 = sub double %0, 1.0
-    ret i64 %1
+    %1 = fsub double %0, 1.0
+    ret double %1
 }
 
 define i64 @$pow$i64_i64(i64, i64) {
@@ -171,8 +171,8 @@ entry:
 
 define double @$pow$i64_double(i64, double) {
 entry:
-    %0 = sitofp i64 %0 to double
-    ret double %0
+    %2 = sitofp i64 %0 to double
+    ret double %2
 }
 
 define double @$pow$double_i64(double, i64) {
@@ -192,8 +192,8 @@ entry:
 
 define double @$root$i64_double(i64, double) {
 entry:
-    %0 = sitofp i64 %0 to double
-    ret double %0
+    %2 = sitofp i64 %0 to double
+    ret double %2
 }
 
 define double @$root$double_i64(double, i64) {
@@ -245,25 +245,29 @@ entry:
 define i64 @$eq$i64_i64(i64, i64) {
 entry:
     %2 = icmp eq i64 %0, %1
-    ret i64 %2
+    %3 = zext i1 %2 to i64
+    ret i64 %3
 }
 
 define i64 @$eq$double_double(double, double) {
 entry:
-    %2 = fcmp eq double %0, %1
-    ret i64 %2
+    %2 = fcmp oeq double %0, %1
+    %3 = zext i1 %2 to i64
+    ret i64 %3
 }
 
 define i64 @$ne$i64_i64(i64, i64) {
 entry:
     %2 = icmp ne i64 %0, %1
-    ret i64 %2
+    %3 = zext i1 %2 to i64
+    ret i64 %3
 }
 
 define i64 @$ne$double_double(double, double) {
 entry:
-    %2 = fcmp ne double %0, %1
-    ret i64 %2
+    %2 = fcmp one double %0, %1
+    %3 = zext i1 %2 to i64
+    ret i64 %3
 }
 
 define i64 @$less$i64_i64(i64, i64) {
@@ -276,7 +280,7 @@ entry:
 define i64 @$less$i64_double(i64, double) {
 entry:
     %2 = sitofp i64 %0 to double
-    %3 = fcmp sle double %2, %1
+    %3 = fcmp ole double %2, %1
     %4 = zext i1 %3 to i64
     ret i64 %4
 }
@@ -284,14 +288,14 @@ entry:
 define i64 @$less$double_i64(double, i64) {
 entry:
     %2 = sitofp i64 %1 to double
-    %3 = fcmp sle double %0, %2
+    %3 = fcmp ole double %0, %2
     %4 = zext i1 %3 to i64
     ret i64 %4
 }
 
 define i64 @$less$double_double(double, double) {
 entry:
-    %2 = fcmp sle i64 %0, %1
+    %2 = fcmp ole double %0, %1
     %3 = zext i1 %2 to i64
     ret i64 %3
 }
