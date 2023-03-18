@@ -135,7 +135,7 @@ class Parser(tokenList: List<Token>) {
         val retType = tokens.consumeType() ?: Type.Void
         functions.add(Triple("fn_${funcName}", args.toList(), retType))
         val statement = statement(variables)
-        return Function("fn_${funcName}", args.size, variables.map { it.second }, retType, statement)
+        return Function(funcName, args.size, variables.map { it.second }, retType, statement)
     }
 
     private fun statement(variables: MutableList<Pair<String, Type>>): Statements {
