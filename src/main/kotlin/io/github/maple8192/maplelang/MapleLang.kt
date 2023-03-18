@@ -25,6 +25,7 @@ fun main(args: Array<String>) {
     val tokens = try {
         tokenizer.tokenize()
     } catch (ex: TokenException) {
+        println("Error. (${ex.line + 1}:(${ex.pos + 1})")
         println(src[ex.line])
         print(" ".repeat(ex.pos))
         println("^ ${ex.message}")
@@ -36,6 +37,7 @@ fun main(args: Array<String>) {
     val program = try {
         parser.parse()
     } catch (ex: TokenException) {
+        println("Syntax Error. (${ex.line + 1}:${ex.pos + 1})")
         println(src[ex.line])
         print(" ".repeat(ex.pos))
         println("^ ${ex.message}")
