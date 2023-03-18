@@ -2,6 +2,7 @@ package io.github.maple8192.maplelang
 
 import io.github.maple8192.maplelang.file.FileReader
 import io.github.maple8192.maplelang.exception.TokenException
+import io.github.maple8192.maplelang.llvm.LLVMGenerator
 import io.github.maple8192.maplelang.parser.Parser
 import io.github.maple8192.maplelang.tokenizer.Tokenizer
 
@@ -44,6 +45,12 @@ fun main(args: Array<String>) {
         return
     }
 
+    // LLVM-IRを生成
+    val generator = LLVMGenerator()
+    val llvm = generator.generate(program)
+
     // debug 結果を表示
-    println(program)
+    for (l in llvm) {
+        println(l)
+    }
 }
