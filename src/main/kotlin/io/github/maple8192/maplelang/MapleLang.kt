@@ -2,6 +2,7 @@ package io.github.maple8192.maplelang
 
 import io.github.maple8192.maplelang.file.FileReader
 import io.github.maple8192.maplelang.exception.TokenException
+import io.github.maple8192.maplelang.parser.Parser
 import io.github.maple8192.maplelang.tokenizer.Tokenizer
 
 fun main(args: Array<String>) {
@@ -30,6 +31,17 @@ fun main(args: Array<String>) {
         return
     }
 
+    // 構文解析
+    val parser = Parser(tokens)
+    val program = try {
+        parser.parse()
+    } catch (ex: TokenException) {
+        println(src[ex.line])
+        print(" ".repeat(ex.pos))
+        println("^ ${ex.message}")
+        return
+    }
+
     // debug 結果を表示
-    println(tokens)
+    println(program)
 }
