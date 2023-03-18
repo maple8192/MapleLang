@@ -278,118 +278,138 @@ class Parser(tokenList: List<Token>) {
     }
 
     private fun or(variables: MutableList<Pair<String, Type>>): Node {
-        val node = and(variables)
+        var node = and(variables)
 
-        return if (tokens.consumeSymbol(SymbolType.LOr)) {
-            opCall("lor", listOf(node, and(variables)))
-        } else {
-            node
+        while (true) {
+            node = if (tokens.consumeSymbol(SymbolType.LOr)) {
+                opCall("lor", listOf(node, and(variables)))
+            } else {
+                return node
+            }
         }
     }
 
     private fun and(variables: MutableList<Pair<String, Type>>): Node {
-        val node = bitOr(variables)
+        var node = bitOr(variables)
 
-        return if (tokens.consumeSymbol(SymbolType.LAnd)) {
-            opCall("land", listOf(node, bitOr(variables)))
-        } else {
-            node
+        while (true) {
+            node = if (tokens.consumeSymbol(SymbolType.LAnd)) {
+                opCall("land", listOf(node, bitOr(variables)))
+            } else {
+                return node
+            }
         }
     }
 
     private fun bitOr(variables: MutableList<Pair<String, Type>>): Node {
-        val node = bitXor(variables)
+        var node = bitXor(variables)
 
-        return if (tokens.consumeSymbol(SymbolType.BOr)) {
-            opCall("or", listOf(node, bitXor(variables)))
-        } else {
-            node
+        while (true) {
+            node = if (tokens.consumeSymbol(SymbolType.BOr)) {
+                opCall("or", listOf(node, bitXor(variables)))
+            } else {
+                return node
+            }
         }
     }
 
     private fun bitXor(variables: MutableList<Pair<String, Type>>): Node {
-        val node = bitAnd(variables)
+        var node = bitAnd(variables)
 
-        return if (tokens.consumeSymbol(SymbolType.BXor)) {
-            opCall("xor", listOf(node, bitAnd(variables)))
-        } else {
-            node
+        while (true) {
+            node = if (tokens.consumeSymbol(SymbolType.BXor)) {
+                opCall("xor", listOf(node, bitAnd(variables)))
+            } else {
+                return node
+            }
         }
     }
 
     private fun bitAnd(variables: MutableList<Pair<String, Type>>): Node {
-        val node = equality(variables)
+        var node = equality(variables)
 
-        return if (tokens.consumeSymbol(SymbolType.BAnd)) {
-            opCall("and", listOf(node, equality(variables)))
-        } else {
-            node
+        while (true) {
+            node = if (tokens.consumeSymbol(SymbolType.BAnd)) {
+                opCall("and", listOf(node, equality(variables)))
+            } else {
+                return node
+            }
         }
     }
 
     private fun equality(variables: MutableList<Pair<String, Type>>): Node {
-        val node = relational(variables)
+        var node = relational(variables)
 
-        return if (tokens.consumeSymbol(SymbolType.Eq)) {
-            opCall("eq", listOf(node, relational(variables)))
-        } else if (tokens.consumeSymbol(SymbolType.NEq)) {
-            opCall("ne", listOf(node, relational(variables)))
-        } else {
-            node
+        while (true) {
+            node = if (tokens.consumeSymbol(SymbolType.Eq)) {
+                opCall("eq", listOf(node, relational(variables)))
+            } else if (tokens.consumeSymbol(SymbolType.NEq)) {
+                opCall("ne", listOf(node, relational(variables)))
+            } else {
+                return node
+            }
         }
     }
 
     private fun relational(variables: MutableList<Pair<String, Type>>): Node {
-        val node = shift(variables)
+        var node = shift(variables)
 
-        return if (tokens.consumeSymbol(SymbolType.Less)) {
-            opCall("less", listOf(node, relational(variables)))
-        } else if (tokens.consumeSymbol(SymbolType.ELess)) {
-            opCall("lnot", listOf(opCall("less", listOf(relational(variables), node))))
-        } else if (tokens.consumeSymbol(SymbolType.Greater)) {
-            opCall("less", listOf(relational(variables), node))
-        } else if (tokens.consumeSymbol(SymbolType.EGreater)) {
-            opCall("lnot", listOf(opCall("less", listOf(node, relational(variables)))))
-        } else {
-            node
+        while (true) {
+            node = if (tokens.consumeSymbol(SymbolType.Less)) {
+                opCall("less", listOf(node, relational(variables)))
+            } else if (tokens.consumeSymbol(SymbolType.ELess)) {
+                opCall("lnot", listOf(opCall("less", listOf(relational(variables), node))))
+            } else if (tokens.consumeSymbol(SymbolType.Greater)) {
+                opCall("less", listOf(relational(variables), node))
+            } else if (tokens.consumeSymbol(SymbolType.EGreater)) {
+                opCall("lnot", listOf(opCall("less", listOf(node, relational(variables)))))
+            } else {
+                return node
+            }
         }
     }
 
     private fun shift(variables: MutableList<Pair<String, Type>>): Node {
-        val node = add(variables)
+        var node = add(variables)
 
-        return if (tokens.consumeSymbol(SymbolType.LSft)) {
-            opCall("shl", listOf(node, add(variables)))
-        } else if (tokens.consumeSymbol(SymbolType.RSft)) {
-            opCall("shr", listOf(node, add(variables)))
-        } else {
-            node
+        while (true) {
+            node = if (tokens.consumeSymbol(SymbolType.LSft)) {
+                opCall("shl", listOf(node, add(variables)))
+            } else if (tokens.consumeSymbol(SymbolType.RSft)) {
+                opCall("shr", listOf(node, add(variables)))
+            } else {
+                return node
+            }
         }
     }
 
     private fun add(variables: MutableList<Pair<String, Type>>): Node {
-        val node = mul(variables)
+        var node = mul(variables)
 
-        return if (tokens.consumeSymbol(SymbolType.Add)) {
-            opCall("add", listOf(node, mul(variables)))
-        } else if (tokens.consumeSymbol(SymbolType.Sub)) {
-            opCall("sub", listOf(node, mul(variables)))
-        } else {
-            node
+        while (true) {
+            node = if (tokens.consumeSymbol(SymbolType.Add)) {
+                opCall("add", listOf(node, mul(variables)))
+            } else if (tokens.consumeSymbol(SymbolType.Sub)) {
+                opCall("sub", listOf(node, mul(variables)))
+            } else {
+                return node
+            }
         }
     }
 
     private fun mul(variables: MutableList<Pair<String, Type>>): Node {
-        val node = powerAndRoot(variables)
+        var node = powerAndRoot(variables)
 
-        return if (tokens.consumeSymbol(SymbolType.Mul)) {
-            opCall("mul", listOf(node, powerAndRoot(variables)))
-        } else if (tokens.consumeSymbol(SymbolType.Div)) {
-            opCall("div", listOf(node, powerAndRoot(variables)))
-        } else if (tokens.consumeSymbol(SymbolType.Rem)) {
-            opCall("rem", listOf(node, powerAndRoot(variables)))
-        } else {
-            node
+        while (true) {
+            node = if (tokens.consumeSymbol(SymbolType.Mul)) {
+                opCall("mul", listOf(node, powerAndRoot(variables)))
+            } else if (tokens.consumeSymbol(SymbolType.Div)) {
+                opCall("div", listOf(node, powerAndRoot(variables)))
+            } else if (tokens.consumeSymbol(SymbolType.Rem)) {
+                opCall("rem", listOf(node, powerAndRoot(variables)))
+            } else {
+                return node
+            }
         }
     }
 
@@ -397,9 +417,9 @@ class Parser(tokenList: List<Token>) {
         val node = unary(variables)
 
         return if (tokens.consumeSymbol(SymbolType.Pow)) {
-            opCall("pow", listOf(node, unary(variables)))
+            opCall("pow", listOf(node, powerAndRoot(variables)))
         } else if (tokens.consumeSymbol(SymbolType.Root)) {
-            opCall("root", listOf(node, unary(variables)))
+            opCall("root", listOf(node, powerAndRoot(variables)))
         } else {
             node
         }
