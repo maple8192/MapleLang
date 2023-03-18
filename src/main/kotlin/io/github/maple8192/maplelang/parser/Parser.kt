@@ -473,12 +473,12 @@ class Parser(tokenList: List<Token>) {
     private fun opCall(name: String, args: List<Node>): Node.FnCall {
         // debug 引数を表示
         println("op_${name}, $args")
-        return Node.FnCall(functions.find { it.first == "op_${name}" && it.second == args.map { arg -> arg.type } }?.third ?: throw TokenException(tokens.prevToken.line, tokens.prevToken.pos, "Undefined Operator"), "op_${name}", args)
+        return Node.FnCall(functions.find { it.first == "op_${name}" && it.second == args.map { arg -> arg.type } }?.third ?: throw TokenException(tokens.prevToken.line, tokens.prevToken.pos, "Undefined Operator"), "$${name}", args)
     }
 
     private fun funcCall(name: String, args: List<Node>): Node.FnCall {
         // debug 引数を表示
         println("fn_${name}, $args")
-        return Node.FnCall(functions.find { it.first == "fn_${name}" && it.second == args.map { arg -> arg.type } }?.third ?: throw TokenException(tokens.prevToken.line, tokens.prevToken.pos, "Undefined Function"), "fn_${name}", args)
+        return Node.FnCall(functions.find { it.first == "fn_${name}" && it.second == args.map { arg -> arg.type } }?.third ?: throw TokenException(tokens.prevToken.line, tokens.prevToken.pos, "Undefined Function"), name, args)
     }
 }

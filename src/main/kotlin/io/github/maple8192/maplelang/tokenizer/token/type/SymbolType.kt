@@ -55,6 +55,6 @@ enum class SymbolType(val symbol: String) {
 
     companion object {
         val lenOrderList: List<SymbolType> by lazy { SymbolType.values().toList().sortedByDescending { it.symbol.length } }
-        val symbolChars: Set<Char> by lazy { SymbolType.values().map { it.symbol[0] }.toSet() }
+        val symbolChars: Set<Char> by lazy { SymbolType.values().map { it.symbol[0] }.toMutableSet().also { it.add('$') }.toSet() }
     }
 }
