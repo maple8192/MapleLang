@@ -47,6 +47,7 @@ class Parser(tokenList: List<Token>) {
         it.add(Triple("op_lnot", listOf(Type.Float, Type.Float), Type.Float))
     }
 
+    @Throws(TokenException::class)
     fun parse(): Program {
         return program()
     }
