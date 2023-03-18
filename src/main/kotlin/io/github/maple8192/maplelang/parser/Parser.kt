@@ -18,85 +18,77 @@ class Parser(tokenList: List<Token>) {
 
     private val functions = mutableListOf<Triple<String, List<Type>, Type>>().also {
         it.add(Triple("op_add", listOf(Type.Int, Type.Int), Type.Int))
-        it.add(Triple("op_add", listOf(Type.Int, Type.Float), Type.Int))
-        it.add(Triple("op_add", listOf(Type.Float, Type.Int), Type.Int))
+        it.add(Triple("op_add", listOf(Type.Int, Type.Float), Type.Float))
+        it.add(Triple("op_add", listOf(Type.Float, Type.Int), Type.Float))
         it.add(Triple("op_add", listOf(Type.Float, Type.Float), Type.Float))
+
         it.add(Triple("op_sub", listOf(Type.Int, Type.Int), Type.Int))
-        it.add(Triple("op_sub", listOf(Type.Int, Type.Float), Type.Int))
-        it.add(Triple("op_sub", listOf(Type.Float, Type.Int), Type.Int))
+        it.add(Triple("op_sub", listOf(Type.Int, Type.Float), Type.Float))
+        it.add(Triple("op_sub", listOf(Type.Float, Type.Int), Type.Float))
         it.add(Triple("op_sub", listOf(Type.Float, Type.Float), Type.Float))
+
         it.add(Triple("op_mul", listOf(Type.Int, Type.Int), Type.Int))
-        it.add(Triple("op_mul", listOf(Type.Int, Type.Float), Type.Int))
-        it.add(Triple("op_mul", listOf(Type.Float, Type.Int), Type.Int))
+        it.add(Triple("op_mul", listOf(Type.Int, Type.Float), Type.Float))
+        it.add(Triple("op_mul", listOf(Type.Float, Type.Int), Type.Float))
         it.add(Triple("op_mul", listOf(Type.Float, Type.Float), Type.Float))
+
         it.add(Triple("op_div", listOf(Type.Int, Type.Int), Type.Int))
-        it.add(Triple("op_div", listOf(Type.Int, Type.Float), Type.Int))
-        it.add(Triple("op_div", listOf(Type.Float, Type.Int), Type.Int))
+        it.add(Triple("op_div", listOf(Type.Int, Type.Float), Type.Float))
+        it.add(Triple("op_div", listOf(Type.Float, Type.Int), Type.Float))
         it.add(Triple("op_div", listOf(Type.Float, Type.Float), Type.Float))
+
         it.add(Triple("op_rem", listOf(Type.Int, Type.Int), Type.Int))
-        it.add(Triple("op_rem", listOf(Type.Int, Type.Float), Type.Int))
-        it.add(Triple("op_rem", listOf(Type.Float, Type.Int), Type.Int))
+        it.add(Triple("op_rem", listOf(Type.Int, Type.Float), Type.Float))
+        it.add(Triple("op_rem", listOf(Type.Float, Type.Int), Type.Float))
         it.add(Triple("op_rem", listOf(Type.Float, Type.Float), Type.Float))
-        it.add(Triple("op_minus", listOf(Type.Int, Type.Int), Type.Int))
-        it.add(Triple("op_minus", listOf(Type.Int, Type.Float), Type.Int))
-        it.add(Triple("op_minus", listOf(Type.Float, Type.Int), Type.Int))
-        it.add(Triple("op_minus", listOf(Type.Float, Type.Float), Type.Float))
+
+        it.add(Triple("op_minus", listOf(Type.Int), Type.Int))
+        it.add(Triple("op_minus", listOf(Type.Float), Type.Float))
+
         it.add(Triple("op_inc", listOf(Type.Int), Type.Int))
         it.add(Triple("op_inc", listOf(Type.Float), Type.Float))
+
         it.add(Triple("op_dec", listOf(Type.Int), Type.Int))
         it.add(Triple("op_dec", listOf(Type.Float), Type.Float))
+
         it.add(Triple("op_pow", listOf(Type.Int, Type.Int), Type.Int))
-        it.add(Triple("op_pow", listOf(Type.Int, Type.Float), Type.Int))
-        it.add(Triple("op_pow", listOf(Type.Float, Type.Int), Type.Int))
+        it.add(Triple("op_pow", listOf(Type.Int, Type.Float), Type.Float))
+        it.add(Triple("op_pow", listOf(Type.Float, Type.Int), Type.Float))
         it.add(Triple("op_pow", listOf(Type.Float, Type.Float), Type.Float))
+
         it.add(Triple("op_root", listOf(Type.Int, Type.Int), Type.Int))
-        it.add(Triple("op_root", listOf(Type.Int, Type.Float), Type.Int))
-        it.add(Triple("op_root", listOf(Type.Float, Type.Int), Type.Int))
+        it.add(Triple("op_root", listOf(Type.Int, Type.Float), Type.Float))
+        it.add(Triple("op_root", listOf(Type.Float, Type.Int), Type.Float))
         it.add(Triple("op_root", listOf(Type.Float, Type.Float), Type.Float))
+
         it.add(Triple("op_not", listOf(Type.Int), Type.Int))
-        it.add(Triple("op_not", listOf(Type.Float), Type.Float))
+
         it.add(Triple("op_and", listOf(Type.Int, Type.Int), Type.Int))
-        it.add(Triple("op_and", listOf(Type.Int, Type.Float), Type.Int))
-        it.add(Triple("op_and", listOf(Type.Float, Type.Int), Type.Int))
-        it.add(Triple("op_and", listOf(Type.Float, Type.Float), Type.Float))
+
         it.add(Triple("op_xor", listOf(Type.Int, Type.Int), Type.Int))
-        it.add(Triple("op_xor", listOf(Type.Int, Type.Float), Type.Int))
-        it.add(Triple("op_xor", listOf(Type.Float, Type.Int), Type.Int))
-        it.add(Triple("op_xor", listOf(Type.Float, Type.Float), Type.Float))
+
         it.add(Triple("op_or", listOf(Type.Int, Type.Int), Type.Int))
-        it.add(Triple("op_or", listOf(Type.Int, Type.Float), Type.Int))
-        it.add(Triple("op_or", listOf(Type.Float, Type.Int), Type.Int))
-        it.add(Triple("op_or", listOf(Type.Float, Type.Float), Type.Float))
+
         it.add(Triple("op_shl", listOf(Type.Int, Type.Int), Type.Int))
-        it.add(Triple("op_shl", listOf(Type.Int, Type.Float), Type.Int))
-        it.add(Triple("op_shl", listOf(Type.Float, Type.Int), Type.Int))
-        it.add(Triple("op_shl", listOf(Type.Float, Type.Float), Type.Float))
+
         it.add(Triple("op_shr", listOf(Type.Int, Type.Int), Type.Int))
-        it.add(Triple("op_shr", listOf(Type.Int, Type.Float), Type.Int))
-        it.add(Triple("op_shr", listOf(Type.Float, Type.Int), Type.Int))
-        it.add(Triple("op_shr", listOf(Type.Float, Type.Float), Type.Float))
+
         it.add(Triple("op_eq", listOf(Type.Int, Type.Int), Type.Int))
-        it.add(Triple("op_eq", listOf(Type.Int, Type.Float), Type.Int))
-        it.add(Triple("op_eq", listOf(Type.Float, Type.Int), Type.Int))
-        it.add(Triple("op_eq", listOf(Type.Float, Type.Float), Type.Float))
+        it.add(Triple("op_eq", listOf(Type.Float, Type.Float), Type.Int))
+
         it.add(Triple("op_ne", listOf(Type.Int, Type.Int), Type.Int))
-        it.add(Triple("op_ne", listOf(Type.Int, Type.Float), Type.Int))
-        it.add(Triple("op_ne", listOf(Type.Float, Type.Int), Type.Int))
-        it.add(Triple("op_ne", listOf(Type.Float, Type.Float), Type.Float))
+        it.add(Triple("op_ne", listOf(Type.Float, Type.Float), Type.Int))
+
         it.add(Triple("op_less", listOf(Type.Int, Type.Int), Type.Int))
         it.add(Triple("op_less", listOf(Type.Int, Type.Float), Type.Int))
         it.add(Triple("op_less", listOf(Type.Float, Type.Int), Type.Int))
-        it.add(Triple("op_less", listOf(Type.Float, Type.Float), Type.Float))
+        it.add(Triple("op_less", listOf(Type.Float, Type.Float), Type.Int))
+
         it.add(Triple("op_lnot", listOf(Type.Int), Type.Int))
-        it.add(Triple("op_lnot", listOf(Type.Float), Type.Float))
+
         it.add(Triple("op_land", listOf(Type.Int, Type.Int), Type.Int))
-        it.add(Triple("op_land", listOf(Type.Int, Type.Float), Type.Int))
-        it.add(Triple("op_land", listOf(Type.Float, Type.Int), Type.Int))
-        it.add(Triple("op_land", listOf(Type.Float, Type.Float), Type.Float))
+
         it.add(Triple("op_lor", listOf(Type.Int, Type.Int), Type.Int))
-        it.add(Triple("op_lor", listOf(Type.Int, Type.Float), Type.Int))
-        it.add(Triple("op_lor", listOf(Type.Float, Type.Int), Type.Int))
-        it.add(Triple("op_lor", listOf(Type.Float, Type.Float), Type.Float))
     }
 
     @Throws(TokenException::class)
