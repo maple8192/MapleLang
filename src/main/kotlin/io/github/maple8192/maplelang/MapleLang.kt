@@ -2,9 +2,11 @@ package io.github.maple8192.maplelang
 
 import io.github.maple8192.maplelang.file.FileReader
 import io.github.maple8192.maplelang.exception.TokenException
+import io.github.maple8192.maplelang.file.FileWriter
 import io.github.maple8192.maplelang.llvm.LLVMGenerator
 import io.github.maple8192.maplelang.parser.Parser
 import io.github.maple8192.maplelang.tokenizer.Tokenizer
+import kotlin.io.path.Path
 
 fun main(args: Array<String>) {
     // 引数の数をチェック
@@ -49,8 +51,7 @@ fun main(args: Array<String>) {
     val generator = LLVMGenerator()
     val llvm = generator.generate(program)
 
-    // debug 結果を表示
-    for (l in llvm) {
-        println(l)
-    }
+    // ファイルに出力
+    val writer = FileWriter(Path(args[1]))
+    writer.write(llvm)
 }
