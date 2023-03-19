@@ -131,6 +131,12 @@ class LLVMGenerator {
         val code = mutableListOf<String>()
 
         when (node) {
+            is Node.Comma -> {
+                for (i in node.list.indices) {
+                    code.addAll(genNode(node.list[i], stack, reg, label))
+                    if (i != node.list.lastIndex) stack.removeLast()
+                }
+            }
             is Node.Assign -> {
                 code.addAll(genNode(node.node, stack, reg, label))
                 code.add("  store ${node.type.str} %${stack.removeLast()}, ${node.type.str}* %${node.offset}")
