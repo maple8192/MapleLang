@@ -89,6 +89,9 @@ class Parser(tokenList: List<Token>) {
         it.add(Triple("op_land", listOf(Type.Int, Type.Int), Type.Int))
 
         it.add(Triple("op_lor", listOf(Type.Int, Type.Int), Type.Int))
+
+        it.add(Triple("op_cond", listOf(Type.Int, Type.Int, Type.Int), Type.Int))
+        it.add(Triple("op_cond", listOf(Type.Int, Type.Float, Type.Float), Type.Float))
     }
 
     @Throws(TokenException::class)
@@ -228,7 +231,7 @@ class Parser(tokenList: List<Token>) {
     }
 
     private fun assign(variables: MutableList<Pair<String, Type>>): Node {
-        val node = or(variables)
+        val node = condition(variables)
 
         return if (node is Node.Variable) {
             if (tokens.consumeSymbol(SymbolType.Assign)) {
@@ -264,6 +267,19 @@ class Parser(tokenList: List<Token>) {
             } else {
                 node
             }
+        } else {
+            node
+        }
+    }
+
+    private fun condition(variables: MutableList<Pair<String, Type>>): Node {
+        val node = or(variables)
+
+        return if (tokens.consumeSymbol(SymbolType.CThen)) {
+            val then = condition(variables)
+            tokens.expectSymbol(SymbolType.CElse)
+            val els = condition(variables)
+            opCall("cond", listOf(node, then, els))
         } else {
             node
         }
