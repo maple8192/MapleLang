@@ -261,9 +261,11 @@ class Parser(tokenList: List<Token>) {
             } else if (tokens.consumeSymbol(SymbolType.ARSft)) {
                 Node.Assign(node.type, node.offset, opCall("shr", listOf(node, assign(variables))))
             } else if (tokens.consumeSymbol(SymbolType.ChMin)) {
-                Node.ChMin(node.type, node.offset, assign(variables))
+                val value = assign(variables)
+                Node.Assign(node.type, node.offset, opCall("cond", listOf(opCall("less", listOf(value, node)), value, node)))
             } else if (tokens.consumeSymbol(SymbolType.ChMax)) {
-                Node.ChMax(node.type, node.offset, assign(variables))
+                val value = assign(variables)
+                Node.Assign(node.type, node.offset, opCall("cond", listOf(opCall("less", listOf(node, value)), value, node)))
             } else {
                 node
             }

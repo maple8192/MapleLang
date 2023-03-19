@@ -147,8 +147,6 @@ class LLVMGenerator {
                 code.add("  %${reg.value} = load ${node.type.str}, ${node.type.str}* %${node.lhsOffset}")
                 stack.add(reg.value++)
             }
-            is Node.ChMin -> {}
-            is Node.ChMax -> {}
             is Node.Variable -> {
                 code.add("  %${reg.value} = load ${node.type.str}, ${node.type.str}* %${node.offset}")
                 stack.add(reg.value++)
