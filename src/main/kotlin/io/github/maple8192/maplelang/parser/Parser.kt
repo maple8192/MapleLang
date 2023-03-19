@@ -211,7 +211,23 @@ class Parser(tokenList: List<Token>) {
     }
 
     private fun expression(variables: MutableList<Pair<String, Type>>): Node {
-        return exchange(variables)
+        return comma(variables)
+    }
+
+    private fun comma(variables: MutableList<Pair<String, Type>>): Node {
+        val nodes = mutableListOf(exchange(variables))
+
+        while (true) {
+            if (tokens.consumeSymbol(SymbolType.Comma)) {
+                nodes.add(exchange(variables))
+            } else {
+                return if (nodes.size == 1) {
+                    nodes[0]
+                } else {
+                    Node.Comma(nodes[nodes.lastIndex].type, nodes.toList())
+                }
+            }
+        }
     }
 
     private fun exchange(variables: MutableList<Pair<String, Type>>): Node {
