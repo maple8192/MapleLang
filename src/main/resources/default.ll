@@ -324,3 +324,17 @@ entry:
     %5 = zext i1 %4 to i64
     ret i64 %5
 }
+
+define i64 @$cond$i64_i64_i64(i64, i64, i64) {
+entry:
+    %3 = icmp ne i64 %0, 0
+    %4 = select i1 %3, i64 %1, i64 %2
+    ret i64 %4
+}
+
+define double @$cond$i64_double_double(i64, double, double) {
+entry:
+    %3 = icmp ne i64 %0, 0
+    %4 = select i1 %3, double %1, double %2
+    ret double %4
+}
