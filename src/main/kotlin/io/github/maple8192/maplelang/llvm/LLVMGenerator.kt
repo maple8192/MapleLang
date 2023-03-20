@@ -44,7 +44,7 @@ class LLVMGenerator {
             code.add("  store ${t.str} ${if (i < function.argsNum) "%arg${i}" else "0"}, ${t.str}* %${i}")
         }
 
-        code.addAll(genStatement(function.statement, ArrayDeque(), Ref(function.variables.size), Ref(0)))
+        code.addAll(genStatement(function.statement, ArrayDeque(), Ref(function.variables.size), Ref(0), ArrayDeque()))
 
         code.add("  ret ${function.returnType.str}${when (function.returnType) { Type.Int -> " 0"; Type.Float -> " 0.0"; Type.Void -> "" }}")
         code.add("}")
@@ -53,92 +53,102 @@ class LLVMGenerator {
         return code
     }
 
-    private fun genStatement(statement: Statements, stack: ArrayDeque<Int>, reg: Ref<Int>, label: Ref<Int>): List<String> {
+    private fun genStatement(statement: Statements, stack: ArrayDeque<Int>, reg: Ref<Int>, label: Ref<Int>, lStack: ArrayDeque<Int>): List<String> {
         val code = mutableListOf<String>()
 
         when (statement) {
             is Statements.Statement -> {
-                code.addAll(genNode(statement.node, stack, reg, label))
+                code.addAll(genNode(statement.node, stack, reg, label, lStack))
                 stack.removeLast()
             }
             is Statements.Block -> {
                 for (s in statement.statements) {
-                    code.addAll(genStatement(s, stack, reg, label))
+                    code.addAll(genStatement(s, stack, reg, label, lStack))
                 }
             }
+            is Statements.Break -> {
+                code.add("  br label %end${lStack.last()}")
+                reg.value++
+            }
             is Statements.Return -> {
-                code.addAll(genNode(statement.node, stack, reg, label))
+                code.addAll(genNode(statement.node, stack, reg, label, lStack))
                 code.add("  ret ${statement.node.type.str} %${stack.removeLast()}")
                 reg.value++
             }
             is Statements.If -> {
                 val l = label.value++
-                code.addAll(genNode(statement.condition, stack, reg, label))
+                code.addAll(genNode(statement.condition, stack, reg, label, lStack))
                 code.add("  %${reg.value} = icmp ne i64 %${stack.removeLast()}, 0")
                 code.add("  br i1 %${reg.value++}, label %then${l}, label %else${l}")
                 code.add("then${l}:")
-                code.addAll(genStatement(statement.trueCase, stack, reg, label))
+                code.addAll(genStatement(statement.trueCase, stack, reg, label, lStack))
                 code.add("  br label %end${l}")
                 code.add("else${l}:")
-                statement.falseCase?.also { code.addAll(genStatement(it, stack, reg, label)) }
+                statement.falseCase?.also { code.addAll(genStatement(it, stack, reg, label, lStack)) }
                 code.add("  br label %end${l}")
                 code.add("end${l}:")
             }
             is Statements.For -> {
                 val l = label.value++
-                statement.init?.also { code.addAll(genStatement(Statements.Statement(it), stack, reg, label)) }
+                lStack.add(l)
+                statement.init?.also { code.addAll(genStatement(Statements.Statement(it), stack, reg, label, lStack)) }
                 code.add("  br label %begin${l}")
                 code.add("begin${l}:")
                 if (statement.condition != null) {
-                    code.addAll(genNode(statement.condition, stack, reg, label))
+                    code.addAll(genNode(statement.condition, stack, reg, label, lStack))
                     code.add("  %${reg.value} = icmp ne i64 %${stack.removeLast()}, 0")
                     code.add("  br i1 %${reg.value++}, label %then${l}, label %end${l}")
                 } else {
                     code.add("  br label %then${l}")
                 }
                 code.add("then${l}:")
-                code.addAll(genStatement(statement.statement, stack, reg, label))
-                statement.update?.also { code.addAll(genStatement(Statements.Statement(it), stack, reg, label)) }
+                code.addAll(genStatement(statement.statement, stack, reg, label, lStack))
+                statement.update?.also { code.addAll(genStatement(Statements.Statement(it), stack, reg, label, lStack)) }
                 code.add("  br label %begin${l}")
                 code.add("end${l}:")
+                lStack.removeLast()
             }
             is Statements.While -> {
                 val l = label.value++
+                lStack.add(l)
                 code.add("  br label %begin${l}")
                 code.add("begin${l}:")
-                code.addAll(genNode(statement.condition, stack, reg, label))
+                code.addAll(genNode(statement.condition, stack, reg, label, lStack))
                 code.add("  %${reg.value} = icmp i64 %${stack.removeLast()}, 0")
                 code.add("  br i1 %${reg.value++}, label %then${l}, label %end${l}")
                 code.add("then${l}:")
-                code.addAll(genStatement(statement.statement, stack, reg, label))
+                code.addAll(genStatement(statement.statement, stack, reg, label, lStack))
                 code.add("  br label %begin${l}")
                 code.add("end${l}:")
+                lStack.removeLast()
             }
             is Statements.Loop -> {
                 val l = label.value++
+                lStack.add(l)
                 code.add("  br label %begin${l}")
                 code.add("begin${l}:")
-                code.addAll(genStatement(statement.statement, stack, reg, label))
+                code.addAll(genStatement(statement.statement, stack, reg, label, lStack))
                 code.add("  br label %begin${l}")
                 code.add("end${l}:")
+                lStack.removeLast()
             }
         }
 
         return code
     }
 
-    private fun genNode(node: Node, stack: ArrayDeque<Int>, reg: Ref<Int>, label: Ref<Int>): List<String> {
+    private fun genNode(node: Node, stack: ArrayDeque<Int>, reg: Ref<Int>, label: Ref<Int>, lStack: ArrayDeque<Int>): List<String> {
         val code = mutableListOf<String>()
 
         when (node) {
             is Node.Comma -> {
                 for (i in node.list.indices) {
-                    code.addAll(genNode(node.list[i], stack, reg, label))
+                    code.addAll(genNode(node.list[i], stack, reg, label, lStack))
                     if (i != node.list.lastIndex) stack.removeLast()
                 }
             }
             is Node.Assign -> {
-                code.addAll(genNode(node.node, stack, reg, label))
+                code.addAll(genNode(node.node, stack, reg, label, lStack))
                 code.add("  store ${node.type.str} %${stack.removeLast()}, ${node.type.str}* %${node.offset}")
                 code.add("  %${reg.value} = load ${node.type.str}, ${node.type.str}* %${node.offset}")
                 stack.add(reg.value++)
@@ -160,7 +170,7 @@ class LLVMGenerator {
             is Node.FnCall -> {
                 val arguments = mutableListOf<Pair<Int, Type>>()
                 for (a in node.args) {
-                    code.addAll(genNode(a, stack, reg, label))
+                    code.addAll(genNode(a, stack, reg, label, lStack))
                     arguments.add(stack.removeLast() to a.type)
                 }
                 if (node.type != Type.Void) {
