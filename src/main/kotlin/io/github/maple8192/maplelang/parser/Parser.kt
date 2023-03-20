@@ -185,33 +185,38 @@ class Parser(tokenList: List<Token>) {
             val statement = statement(variables)
             Statements.Loop(statement)
         } else {
-            val type = tokens.consumeType()
-            if (type != null) {
-                val statements = mutableListOf<Statements>()
-                var first = true
-                while (!tokens.consumeSymbol(SymbolType.End)) {
-                    if (!first) tokens.expectSymbol(SymbolType.Comma)
-                    first = false
-
-                    val varName = tokens.expectIdent()
-                    if (variables.find { it.first == varName } != null) throw TokenException(tokens.prevToken.line, tokens.prevToken.pos, "")
-                    variables.add(varName to type)
-                    if (tokens.consumeSymbol(SymbolType.Assign)) {
-                        val expression = expression(variables)
-                        statements.add(Statements.Statement(Node.Assign(type, variables.indexOfFirst { it.first == varName }, expression)))
-                    }
-                }
-                Statements.Block(statements)
-            } else {
-                val expression = expression(variables)
-                tokens.expectSymbol(SymbolType.End)
-                Statements.Statement(expression)
-            }
+            val expression = expression(variables)
+            tokens.expectSymbol(SymbolType.End)
+            Statements.Statement(expression)
         }
     }
 
     private fun expression(variables: MutableList<Pair<String, Type>>): Node {
-        return comma(variables)
+        return declaration(variables)
+    }
+
+    private fun declaration(variables: MutableList<Pair<String, Type>>): Node {
+        val type = tokens.consumeType()
+        return if (type != null) {
+            var first = true
+            val list = mutableListOf<Node>()
+            while (first || tokens.consumeSymbol(SymbolType.Comma)) {
+                first = false
+
+                val varName = tokens.expectIdent()
+                if (variables.find { it.first == varName } != null) throw TokenException(tokens.prevToken.line, tokens.prevToken.pos, "Already Exist")
+                variables.add(varName to type)
+                val node = if (tokens.consumeSymbol(SymbolType.Assign)) {
+                    Node.Assign(type, variables.indexOfFirst { it.first == varName }, exchange(variables))
+                } else {
+                    Node.Variable(type, variables.indexOfFirst { it.first == varName })
+                }
+                list.add(node)
+            }
+            Node.Comma(type, list.toList())
+        } else {
+            comma(variables)
+        }
     }
 
     private fun comma(variables: MutableList<Pair<String, Type>>): Node {
