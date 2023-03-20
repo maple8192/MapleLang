@@ -272,7 +272,7 @@ entry:
 
 define i64 @$less$i64_i64(i64, i64) {
 entry:
-    %2 = icmp sle i64 %0, %1
+    %2 = icmp slt i64 %0, %1
     %3 = zext i1 %2 to i64
     ret i64 %3
 }
@@ -280,7 +280,7 @@ entry:
 define i64 @$less$i64_double(i64, double) {
 entry:
     %2 = sitofp i64 %0 to double
-    %3 = fcmp ole double %2, %1
+    %3 = fcmp olt double %2, %1
     %4 = zext i1 %3 to i64
     ret i64 %4
 }
@@ -288,14 +288,14 @@ entry:
 define i64 @$less$double_i64(double, i64) {
 entry:
     %2 = sitofp i64 %1 to double
-    %3 = fcmp ole double %0, %2
+    %3 = fcmp olt double %0, %2
     %4 = zext i1 %3 to i64
     ret i64 %4
 }
 
 define i64 @$less$double_double(double, double) {
 entry:
-    %2 = fcmp ole double %0, %1
+    %2 = fcmp olt double %0, %1
     %3 = zext i1 %2 to i64
     ret i64 %3
 }
