@@ -66,6 +66,10 @@ class LLVMGenerator {
                     code.addAll(genStatement(s, stack, reg, label, lStack))
                 }
             }
+            is Statements.Continue -> {
+                code.add("  br label %begin${lStack.last()}")
+                reg.value++
+            }
             is Statements.Break -> {
                 code.add("  br label %end${lStack.last()}")
                 reg.value++
@@ -92,8 +96,11 @@ class LLVMGenerator {
                 val l = label.value++
                 lStack.add(l)
                 statement.init?.also { code.addAll(genStatement(Statements.Statement(it), stack, reg, label, lStack)) }
-                code.add("  br label %begin${l}")
+                code.add("  br label %cond${l}")
                 code.add("begin${l}:")
+                statement.update?.also { code.addAll(genStatement(Statements.Statement(it), stack, reg, label, lStack)) }
+                code.add("  br label %cond${l}")
+                code.add("cond${l}:")
                 if (statement.condition != null) {
                     code.addAll(genNode(statement.condition, stack, reg, label, lStack))
                     code.add("  %${reg.value} = icmp ne i64 %${stack.removeLast()}, 0")
@@ -103,7 +110,6 @@ class LLVMGenerator {
                 }
                 code.add("then${l}:")
                 code.addAll(genStatement(statement.statement, stack, reg, label, lStack))
-                statement.update?.also { code.addAll(genStatement(Statements.Statement(it), stack, reg, label, lStack)) }
                 code.add("  br label %begin${l}")
                 code.add("end${l}:")
                 lStack.removeLast()
