@@ -10,6 +10,7 @@ enum class WordType(val word: String) {
     For("for"),
     While("while"),
     Loop("loop"),
+    Continue("continue"),
     Break("break"),
     Return("ret"),
     Int("int"),

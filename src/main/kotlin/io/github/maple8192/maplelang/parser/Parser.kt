@@ -144,6 +144,9 @@ class Parser(tokenList: List<Token>) {
             val expression = expression(variables)
             tokens.expectSymbol(SymbolType.End)
             Statements.Return(expression)
+        } else if (tokens.consumeWord(WordType.Continue)) {
+            tokens.expectSymbol(SymbolType.End)
+            Statements.Continue()
         } else if (tokens.consumeWord(WordType.Break)) {
             tokens.expectSymbol(SymbolType.End)
             Statements.Break()
