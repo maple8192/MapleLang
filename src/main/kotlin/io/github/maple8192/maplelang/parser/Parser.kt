@@ -489,9 +489,9 @@ class Parser(tokenList: List<Token>) {
                 val variable = variables.find { it.first == ident } ?: throw TokenException(tokens.prevToken.line, tokens.prevToken.pos, "Undefined Variable")
                 val offset = variables.indexOf(variable)
                 return if (tokens.consumeSymbol(SymbolType.Inc)) {
-                    opCall("inc", listOf(Node.Variable(variable.second, offset)))
+                    Node.Assign(variable.second, offset, opCall("inc", listOf(Node.Variable(variable.second, offset))))
                 } else if (tokens.consumeSymbol(SymbolType.Dec)) {
-                    opCall("dec", listOf(Node.Variable(variable.second, offset)))
+                    Node.Assign(variable.second, offset, opCall("dec", listOf(Node.Variable(variable.second, offset))))
                 } else {
                     Node.Variable(variable.second, offset)
                 }
