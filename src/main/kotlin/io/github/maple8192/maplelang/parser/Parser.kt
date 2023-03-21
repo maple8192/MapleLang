@@ -117,13 +117,14 @@ class Parser(tokenList: List<Token>) {
         val fn = mutableListOf<Function>()
 
         while (tokens.currentToken !is Token.Eof) {
-            fn.add(function())
+            val func = function() ?: continue
+            fn.add(func)
         }
 
         return Program(fn.toList())
     }
 
-    private fun function(): Function {
+    private fun function(): Function? {
         tokens.expectWord(WordType.Func)
         val funcName = tokens.expectIdent()
         val variables = mutableListOf<Pair<String, Type>>()
@@ -142,9 +143,14 @@ class Parser(tokenList: List<Token>) {
             }
         }
         val retType = tokens.consumeType() ?: Type.Void
-        functions.add(Triple(funcName, args.toList(), retType))
-        val statement = statement(variables)
-        return Function(funcName, args.size, variables.map { it.second }, retType, statement)
+        if (!functions.contains(Triple(funcName, args.toList(), retType))) functions.add(Triple(funcName, args.toList(), retType))
+
+        return if (tokens.consumeSymbol(SymbolType.End)) {
+            null
+        } else {
+            val statement = statement(variables)
+            Function(funcName, args.size, variables.map { it.second }, retType, statement)
+        }
     }
 
     private fun statement(variables: MutableList<Pair<String, Type>>): Statements {
