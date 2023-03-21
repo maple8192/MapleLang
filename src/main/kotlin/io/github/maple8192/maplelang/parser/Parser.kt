@@ -9,6 +9,7 @@ import io.github.maple8192.maplelang.parser.node.type.Type
 import io.github.maple8192.maplelang.tokenizer.token.Token
 import io.github.maple8192.maplelang.tokenizer.token.type.SymbolType
 import io.github.maple8192.maplelang.tokenizer.token.type.WordType
+import io.github.maple8192.maplelang.util.Either
 
 /**
  * This class parses the program.
@@ -503,7 +504,10 @@ class Parser(tokenList: List<Token>) {
                 }
             }
         } else {
-            Node.Number(Type.Int, tokens.expectNumber())
+            when (val num = tokens.expectNumber()) {
+                is Either.Left -> Node.Number(Type.Int, num.left.toString())
+                is Either.Right -> Node.Number(Type.Float, num.right.toString())
+            }
         }
     }
 

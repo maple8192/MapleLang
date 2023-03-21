@@ -41,7 +41,7 @@ class LLVMGenerator {
         code.add("entry:")
         function.variables.forEachIndexed { i, t ->
             code.add("  %${i} = alloca ${t.str}")
-            code.add("  store ${t.str} ${if (i < function.argsNum) "%arg${i}" else "0"}, ${t.str}* %${i}")
+            code.add("  store ${t.str} ${if (i < function.argsNum) "%arg${i}" else when (t) { Type.Int -> "0"; Type.Float -> "0.0"; Type.Void -> "" } }, ${t.str}* %${i}")
         }
 
         code.addAll(genStatement(function.statement, ArrayDeque(), Ref(function.variables.size), Ref(0), ArrayDeque()))
@@ -190,7 +190,7 @@ class LLVMGenerator {
                 }
             }
             is Node.Number -> {
-                code.add("  %${reg.value} = add ${node.type.str} ${node.number}, 0")
+                code.add("  %${reg.value} = ${if (node.type == Type.Float) "f" else "" }add ${node.type.str} ${node.num}, ${when (node.type) { Type.Int -> "0"; Type.Float -> "0.0"; Type.Void -> "" } }")
                 stack.add(reg.value++)
             }
         }
