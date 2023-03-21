@@ -46,6 +46,7 @@ enum class SymbolType(val symbol: String) {
     Exch("<=>"),
     CThen("?"),
     CElse(":"),
+    Cast("@"),
     OBracket("("),
     CBracket(")"),
     OBrace("{"),
