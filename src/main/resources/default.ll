@@ -274,7 +274,7 @@ entry:
 
 define i1 @$ne.i1.i1(i1, i1) {
 entry:
-    %2 = icmp ne i64 %0, %1
+    %2 = icmp ne i1 %0, %1
     ret i1 %2
 }
 
@@ -313,7 +313,7 @@ entry:
 define i1 @$land.i1.i1(i1, i1) {
 entry:
     %2 = and i1 %0, %1
-    ret i64 %2
+    ret i1 %2
 }
 
 define i1 @$lor.i1.i1(i1, i1) {
