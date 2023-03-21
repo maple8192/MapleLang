@@ -86,7 +86,7 @@ class TokenQueue(private val tokenList: List<Token>) {
 
     fun expectNumber(): Long {
         val token = currentToken
-        if (token is Token.Number) {
+        if (token is Token.IntNum) {
             index++
             return token.num
         }

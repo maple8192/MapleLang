@@ -24,7 +24,10 @@ class Tokenizer(private val src: List<String>) {
                     ' ', '\t' -> pos++
                     in '0'..'9' -> {
                         val (num, length) = createNumberToken(src[line].slice(pos until src[line].length))
-                        tokens.add(Token.Number(line, pos, num))
+                        tokens.add(when (num) {
+                            is Either.Left -> Token.IntNum(line, pos, num.left)
+                            is Either.Right -> Token.FltNum(line, pos, num.right)
+                        })
                         pos += length
                     }
                     in SymbolType.symbolChars -> {
@@ -54,13 +57,19 @@ class Tokenizer(private val src: List<String>) {
         return tokens.toList()
     }
 
-    private fun createNumberToken(str: String): Pair<Long, Int> {
+    private fun createNumberToken(str: String): Pair<Either<Long, Double>, Int> {
+        var dot = false
         for (i in str.indices) {
+            if (!dot && str[i] == '.') {
+                dot = true
+                continue
+            }
+
             if (str[i] !in '0'..'9') {
-                return str.slice(0 until i).toLong() to i
+                return if (str[i] == 'f') Either.Right(str.slice(0 until i).toDouble()) to i + 1 else (if (dot) Either.Right(str.slice(0 until i).toDouble()) else Either.Left(str.slice(0 until i).toLong())) to i
             }
         }
-        return str.toLong() to str.length
+        return (if (dot) Either.Right(str.toDouble()) else Either.Left(str.toLong())) to str.length
     }
 
     private fun createSymbolToken(str: String): SymbolType? {
