@@ -5,6 +5,7 @@ import io.github.maple8192.maplelang.parser.node.type.Type
 import io.github.maple8192.maplelang.tokenizer.token.Token
 import io.github.maple8192.maplelang.tokenizer.token.type.SymbolType
 import io.github.maple8192.maplelang.tokenizer.token.type.WordType
+import io.github.maple8192.maplelang.util.Either
 
 /**
  * This class represents token queue.
@@ -84,11 +85,14 @@ class TokenQueue(private val tokenList: List<Token>) {
         throw TokenException(currentToken.line, currentToken.pos, "Ident token expected.")
     }
 
-    fun expectNumber(): Long {
+    fun expectNumber(): Either<Long, Double> {
         val token = currentToken
-        if (token is Token.Number) {
+        if (token is Token.IntNum) {
             index++
-            return token.num
+            return Either.Left(token.num)
+        } else if (token is Token.FltNum) {
+            index++
+            return Either.Right(token.num)
         }
         throw TokenException(currentToken.line, currentToken.pos, "Number token expected.")
     }
