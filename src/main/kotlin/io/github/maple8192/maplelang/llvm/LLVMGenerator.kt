@@ -22,9 +22,6 @@ class LLVMGenerator {
         } catch (ex: Exception) {
             ex.printStackTrace()
         }
-
-        code.add("")
-        code.add("; -------------------------------------------------------------")
         code.add("")
 
         for (function in program.functions) {
@@ -37,7 +34,7 @@ class LLVMGenerator {
     private fun genFunction(function: Function): List<String> {
         val code = mutableListOf<String>()
 
-        code.add("define ${function.returnType.str} @${function.name}${if (function.name != "main") "$${funcArgs(function.variables.take(function.argsNum))}" else ""}(${genFuncArgs(function.variables.take(function.argsNum))}) {")
+        code.add("define ${function.returnType.str} @${function.name}${funcArgs(function.variables.take(function.argsNum))}(${genFuncArgs(function.variables.take(function.argsNum))}) {")
         code.add("entry:")
         function.variables.forEachIndexed { i, t ->
             code.add("  %${i} = alloca ${t.str}")
@@ -223,6 +220,6 @@ class LLVMGenerator {
     }
 
     private fun funcArgs(args: List<Type>): String {
-        return args.joinToString(separator = "_") { it.str }
+        return args.joinToString { ".${it.str}" }
     }
 }

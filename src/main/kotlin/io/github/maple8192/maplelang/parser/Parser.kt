@@ -535,14 +535,14 @@ class Parser(tokenList: List<Token>) {
     }
 
     private fun opCall(name: String, args: List<Node>): Node.FnCall {
-        return Node.FnCall(operators.find { it.first == name && it.second == args.map { arg -> arg.type } }?.third ?: throw TokenException(tokens.prevToken.line, tokens.prevToken.pos, "Undefined Operator"), "$${name}$${funcArgs(args)}", args)
+        return Node.FnCall(operators.find { it.first == name && it.second == args.map { arg -> arg.type } }?.third ?: throw TokenException(tokens.prevToken.line, tokens.prevToken.pos, "Undefined Operator"), "$${name}${funcArgs(args)}", args)
     }
 
     private fun funcCall(name: String, args: List<Node>): Node.FnCall {
-        return Node.FnCall(functions.find { it.first == name && it.second == args.map { arg -> arg.type } }?.third ?: throw TokenException(tokens.prevToken.line, tokens.prevToken.pos, "Undefined Function"), "${name}$${funcArgs(args)}", args)
+        return Node.FnCall(functions.find { it.first == name && it.second == args.map { arg -> arg.type } }?.third ?: throw TokenException(tokens.prevToken.line, tokens.prevToken.pos, "Undefined Function"), "${name}${funcArgs(args)}", args)
     }
 
     private fun funcArgs(args: List<Node>): String {
-        return args.joinToString(separator = "_") { it.type.str }
+        return args.joinToString(separator = "") { ".${it.type.str}" }
     }
 }
