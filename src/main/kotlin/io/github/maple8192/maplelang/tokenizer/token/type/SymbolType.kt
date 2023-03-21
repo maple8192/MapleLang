@@ -53,6 +53,7 @@ enum class SymbolType(val symbol: String) {
     CBrace("}"),
     OSquare("["),
     CSquare("]"),
+    Dot("."),
     Comma(","),
     End(";");
 
