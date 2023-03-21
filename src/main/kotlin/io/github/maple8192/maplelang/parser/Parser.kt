@@ -17,89 +17,91 @@ import io.github.maple8192.maplelang.util.Either
 class Parser(tokenList: List<Token>) {
     private val tokens = TokenQueue(tokenList)
 
-    private val functions = mutableListOf<Triple<String, List<Type>, Type>>().also {
-        it.add(Triple("op_add", listOf(Type.Int, Type.Int), Type.Int))
-        it.add(Triple("op_add", listOf(Type.Int, Type.Float), Type.Float))
-        it.add(Triple("op_add", listOf(Type.Float, Type.Int), Type.Float))
-        it.add(Triple("op_add", listOf(Type.Float, Type.Float), Type.Float))
+    private val operators = listOf<Triple<String, List<Type>, Type>>(
+        Triple("add", listOf(Type.Int, Type.Int), Type.Int),
+        Triple("add", listOf(Type.Int, Type.Float), Type.Float),
+        Triple("add", listOf(Type.Float, Type.Int), Type.Float),
+        Triple("add", listOf(Type.Float, Type.Float), Type.Float),
 
-        it.add(Triple("op_sub", listOf(Type.Int, Type.Int), Type.Int))
-        it.add(Triple("op_sub", listOf(Type.Int, Type.Float), Type.Float))
-        it.add(Triple("op_sub", listOf(Type.Float, Type.Int), Type.Float))
-        it.add(Triple("op_sub", listOf(Type.Float, Type.Float), Type.Float))
+        Triple("sub", listOf(Type.Int, Type.Int), Type.Int),
+        Triple("sub", listOf(Type.Int, Type.Float), Type.Float),
+        Triple("sub", listOf(Type.Float, Type.Int), Type.Float),
+        Triple("sub", listOf(Type.Float, Type.Float), Type.Float),
 
-        it.add(Triple("op_mul", listOf(Type.Int, Type.Int), Type.Int))
-        it.add(Triple("op_mul", listOf(Type.Int, Type.Float), Type.Float))
-        it.add(Triple("op_mul", listOf(Type.Float, Type.Int), Type.Float))
-        it.add(Triple("op_mul", listOf(Type.Float, Type.Float), Type.Float))
+        Triple("mul", listOf(Type.Int, Type.Int), Type.Int),
+        Triple("mul", listOf(Type.Int, Type.Float), Type.Float),
+        Triple("mul", listOf(Type.Float, Type.Int), Type.Float),
+        Triple("mul", listOf(Type.Float, Type.Float), Type.Float),
 
-        it.add(Triple("op_div", listOf(Type.Int, Type.Int), Type.Int))
-        it.add(Triple("op_div", listOf(Type.Int, Type.Float), Type.Float))
-        it.add(Triple("op_div", listOf(Type.Float, Type.Int), Type.Float))
-        it.add(Triple("op_div", listOf(Type.Float, Type.Float), Type.Float))
+        Triple("div", listOf(Type.Int, Type.Int), Type.Int),
+        Triple("div", listOf(Type.Int, Type.Float), Type.Float),
+        Triple("div", listOf(Type.Float, Type.Int), Type.Float),
+        Triple("div", listOf(Type.Float, Type.Float), Type.Float),
 
-        it.add(Triple("op_rem", listOf(Type.Int, Type.Int), Type.Int))
-        it.add(Triple("op_rem", listOf(Type.Int, Type.Float), Type.Float))
-        it.add(Triple("op_rem", listOf(Type.Float, Type.Int), Type.Float))
-        it.add(Triple("op_rem", listOf(Type.Float, Type.Float), Type.Float))
+        Triple("rem", listOf(Type.Int, Type.Int), Type.Int),
+        Triple("rem", listOf(Type.Int, Type.Float), Type.Float),
+        Triple("rem", listOf(Type.Float, Type.Int), Type.Float),
+        Triple("rem", listOf(Type.Float, Type.Float), Type.Float),
 
-        it.add(Triple("op_minus", listOf(Type.Int), Type.Int))
-        it.add(Triple("op_minus", listOf(Type.Float), Type.Float))
+        Triple("minus", listOf(Type.Int), Type.Int),
+        Triple("minus", listOf(Type.Float), Type.Float),
 
-        it.add(Triple("op_inc", listOf(Type.Int), Type.Int))
-        it.add(Triple("op_inc", listOf(Type.Float), Type.Float))
+        Triple("inc", listOf(Type.Int), Type.Int),
+        Triple("inc", listOf(Type.Float), Type.Float),
 
-        it.add(Triple("op_dec", listOf(Type.Int), Type.Int))
-        it.add(Triple("op_dec", listOf(Type.Float), Type.Float))
+        Triple("dec", listOf(Type.Int), Type.Int),
+        Triple("dec", listOf(Type.Float), Type.Float),
 
-        it.add(Triple("op_pow", listOf(Type.Int, Type.Int), Type.Int))
-        it.add(Triple("op_pow", listOf(Type.Int, Type.Float), Type.Float))
-        it.add(Triple("op_pow", listOf(Type.Float, Type.Int), Type.Float))
-        it.add(Triple("op_pow", listOf(Type.Float, Type.Float), Type.Float))
+        Triple("pow", listOf(Type.Int, Type.Int), Type.Int),
+        Triple("pow", listOf(Type.Int, Type.Float), Type.Float),
+        Triple("pow", listOf(Type.Float, Type.Int), Type.Float),
+        Triple("pow", listOf(Type.Float, Type.Float), Type.Float),
 
-        it.add(Triple("op_root", listOf(Type.Int, Type.Int), Type.Int))
-        it.add(Triple("op_root", listOf(Type.Int, Type.Float), Type.Float))
-        it.add(Triple("op_root", listOf(Type.Float, Type.Int), Type.Float))
-        it.add(Triple("op_root", listOf(Type.Float, Type.Float), Type.Float))
+        Triple("root", listOf(Type.Int, Type.Int), Type.Int),
+        Triple("root", listOf(Type.Int, Type.Float), Type.Float),
+        Triple("root", listOf(Type.Float, Type.Int), Type.Float),
+        Triple("root", listOf(Type.Float, Type.Float), Type.Float),
 
-        it.add(Triple("op_not", listOf(Type.Int), Type.Int))
+        Triple("not", listOf(Type.Int), Type.Int),
 
-        it.add(Triple("op_and", listOf(Type.Int, Type.Int), Type.Int))
+        Triple("and", listOf(Type.Int, Type.Int), Type.Int),
 
-        it.add(Triple("op_xor", listOf(Type.Int, Type.Int), Type.Int))
+        Triple("xor", listOf(Type.Int, Type.Int), Type.Int),
 
-        it.add(Triple("op_or", listOf(Type.Int, Type.Int), Type.Int))
+        Triple("or", listOf(Type.Int, Type.Int), Type.Int),
 
-        it.add(Triple("op_shl", listOf(Type.Int, Type.Int), Type.Int))
+        Triple("shl", listOf(Type.Int, Type.Int), Type.Int),
 
-        it.add(Triple("op_shr", listOf(Type.Int, Type.Int), Type.Int))
+        Triple("shr", listOf(Type.Int, Type.Int), Type.Int),
 
-        it.add(Triple("op_eq", listOf(Type.Int, Type.Int), Type.Int))
-        it.add(Triple("op_eq", listOf(Type.Float, Type.Float), Type.Int))
+        Triple("eq", listOf(Type.Int, Type.Int), Type.Int),
+        Triple("eq", listOf(Type.Float, Type.Float), Type.Int),
 
-        it.add(Triple("op_ne", listOf(Type.Int, Type.Int), Type.Int))
-        it.add(Triple("op_ne", listOf(Type.Float, Type.Float), Type.Int))
+        Triple("ne", listOf(Type.Int, Type.Int), Type.Int),
+        Triple("ne", listOf(Type.Float, Type.Float), Type.Int),
 
-        it.add(Triple("op_less", listOf(Type.Int, Type.Int), Type.Int))
-        it.add(Triple("op_less", listOf(Type.Int, Type.Float), Type.Int))
-        it.add(Triple("op_less", listOf(Type.Float, Type.Int), Type.Int))
-        it.add(Triple("op_less", listOf(Type.Float, Type.Float), Type.Int))
+        Triple("less", listOf(Type.Int, Type.Int), Type.Int),
+        Triple("less", listOf(Type.Int, Type.Float), Type.Int),
+        Triple("less", listOf(Type.Float, Type.Int), Type.Int),
+        Triple("less", listOf(Type.Float, Type.Float), Type.Int),
 
-        it.add(Triple("op_lnot", listOf(Type.Int), Type.Int))
+        Triple("lnot", listOf(Type.Int), Type.Int),
 
-        it.add(Triple("op_land", listOf(Type.Int, Type.Int), Type.Int))
+        Triple("land", listOf(Type.Int, Type.Int), Type.Int),
 
-        it.add(Triple("op_lor", listOf(Type.Int, Type.Int), Type.Int))
+        Triple("lor", listOf(Type.Int, Type.Int), Type.Int),
 
-        it.add(Triple("op_cond", listOf(Type.Int, Type.Int, Type.Int), Type.Int))
-        it.add(Triple("op_cond", listOf(Type.Int, Type.Float, Type.Float), Type.Float))
+        Triple("cond", listOf(Type.Int, Type.Int, Type.Int), Type.Int),
+        Triple("cond", listOf(Type.Int, Type.Float, Type.Float), Type.Float),
 
-        it.add(Triple("op_to_i64", listOf(Type.Int), Type.Int))
-        it.add(Triple("op_to_i64", listOf(Type.Float), Type.Int))
+        Triple("to_i64", listOf(Type.Int), Type.Int),
+        Triple("to_i64", listOf(Type.Float), Type.Int),
 
-        it.add(Triple("op_to_double", listOf(Type.Int), Type.Float))
-        it.add(Triple("op_to_double", listOf(Type.Float), Type.Float))
-    }
+        Triple("to_double", listOf(Type.Int), Type.Float),
+        Triple("to_double", listOf(Type.Float), Type.Float),
+    )
+
+    private val functions = mutableListOf<Triple<String, List<Type>, Type>>()
 
     @Throws(TokenException::class)
     fun parse(): Program {
@@ -135,7 +137,7 @@ class Parser(tokenList: List<Token>) {
             }
         }
         val retType = tokens.consumeType() ?: Type.Void
-        functions.add(Triple("fn_${funcName}", args.toList(), retType))
+        functions.add(Triple(funcName, args.toList(), retType))
         val statement = statement(variables)
         return Function(funcName, args.size, variables.map { it.second }, retType, statement)
     }
@@ -533,11 +535,11 @@ class Parser(tokenList: List<Token>) {
     }
 
     private fun opCall(name: String, args: List<Node>): Node.FnCall {
-        return Node.FnCall(functions.find { it.first == "op_${name}" && it.second == args.map { arg -> arg.type } }?.third ?: throw TokenException(tokens.prevToken.line, tokens.prevToken.pos, "Undefined Operator"), "$${name}$${funcArgs(args)}", args)
+        return Node.FnCall(operators.find { it.first == name && it.second == args.map { arg -> arg.type } }?.third ?: throw TokenException(tokens.prevToken.line, tokens.prevToken.pos, "Undefined Operator"), "$${name}$${funcArgs(args)}", args)
     }
 
     private fun funcCall(name: String, args: List<Node>): Node.FnCall {
-        return Node.FnCall(functions.find { it.first == "fn_${name}" && it.second == args.map { arg -> arg.type } }?.third ?: throw TokenException(tokens.prevToken.line, tokens.prevToken.pos, "Undefined Function"), "${name}$${funcArgs(args)}", args)
+        return Node.FnCall(functions.find { it.first == name && it.second == args.map { arg -> arg.type } }?.third ?: throw TokenException(tokens.prevToken.line, tokens.prevToken.pos, "Undefined Function"), "${name}$${funcArgs(args)}", args)
     }
 
     private fun funcArgs(args: List<Node>): String {
