@@ -15,4 +15,5 @@ enum class WordType(val word: String) {
     Return("ret"),
     Int("int"),
     Float("flt"),
+    Bool("bool"),
 }
