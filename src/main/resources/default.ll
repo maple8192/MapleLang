@@ -242,111 +242,113 @@ entry:
     ret i64 %2
 }
 
-define i64 @$eq.i64.i64(i64, i64) {
+define i1 @$eq.i64.i64(i64, i64) {
 entry:
     %2 = icmp eq i64 %0, %1
-    %3 = zext i1 %2 to i64
-    ret i64 %3
+    ret i1 %2
 }
 
-define i64 @$eq.double.double(double, double) {
+define i1 @$eq.double.double(double, double) {
 entry:
     %2 = fcmp oeq double %0, %1
-    %3 = zext i1 %2 to i64
-    ret i64 %3
+    ret i1 %2
 }
 
-define i64 @$ne.i64.i64(i64, i64) {
+define i1 @$eq.i1.i1(i1, i1) {
+entry:
+    %2 = icmp eq i1 %0, %1
+    ret i1 %2
+}
+
+define i1 @$ne.i64.i64(i64, i64) {
 entry:
     %2 = icmp ne i64 %0, %1
-    %3 = zext i1 %2 to i64
-    ret i64 %3
+    ret i1 %2
 }
 
-define i64 @$ne.double.double(double, double) {
+define i1 @$ne.double.double(double, double) {
 entry:
     %2 = fcmp one double %0, %1
-    %3 = zext i1 %2 to i64
-    ret i64 %3
+    ret i1 %2
 }
 
-define i64 @$less.i64.i64(i64, i64) {
+define i1 @$ne.i1.i1(i1, i1) {
+entry:
+    %2 = icmp ne i64 %0, %1
+    ret i1 %2
+}
+
+define i1 @$less.i64.i64(i64, i64) {
 entry:
     %2 = icmp slt i64 %0, %1
-    %3 = zext i1 %2 to i64
-    ret i64 %3
+    ret i1 %2
 }
 
-define i64 @$less.i64.double(i64, double) {
+define i1 @$less.i64.double(i64, double) {
 entry:
     %2 = sitofp i64 %0 to double
     %3 = fcmp olt double %2, %1
-    %4 = zext i1 %3 to i64
-    ret i64 %4
+    ret i1 %3
 }
 
-define i64 @$less.double.i64(double, i64) {
+define i1 @$less.double.i64(double, i64) {
 entry:
     %2 = sitofp i64 %1 to double
     %3 = fcmp olt double %0, %2
-    %4 = zext i1 %3 to i64
-    ret i64 %4
+    ret i1 %3
 }
 
-define i64 @$less.double.double(double, double) {
+define i1 @$less.double.double(double, double) {
 entry:
     %2 = fcmp olt double %0, %1
-    %3 = zext i1 %2 to i64
-    ret i64 %3
+    ret i1 %2
 }
 
-define i64 @$lnot.i64(i64) {
+define i1 @$lnot.i1(i1) {
 entry:
-    %1 = icmp eq i64 %0, 0
-    %2 = zext i1 %1 to i64
+    %1 = xor i1 %0, 1
+    ret i1 %1
+}
+
+define i1 @$land.i1.i1(i1, i1) {
+entry:
+    %2 = and i1 %0, %1
     ret i64 %2
 }
 
-define i64 @$land.i64.i64(i64, i64) {
+define i1 @$lor.i1.i1(i1, i1) {
 entry:
-    %2 = icmp ne i64 %0, 0
-    %3 = icmp ne i64 %1, 0
-    %4 = and i1 %2, %3
-    %5 = zext i1 %4 to i64
-    ret i64 %5
+    %2 = or i1 %0, %1
+    ret i1 %2
 }
 
-define i64 @$lor.i64.i64(i64, i64) {
+define i64 @$cond.i1.i64.i64(i1, i64, i64) {
 entry:
-    %2 = icmp ne i64 %0, 0
-    %3 = icmp ne i64 %1, 0
-    %4 = or i1 %2, %3
-    %5 = zext i1 %4 to i64
-    ret i64 %5
+    %3 = select i1 %0, i64 %1, i64 %2
+    ret i64 %3
 }
 
-define i64 @$cond.i64.i64.i64(i64, i64, i64) {
+define double @$cond.i1.double.double(i1, double, double) {
 entry:
-    %3 = icmp ne i64 %0, 0
-    %4 = select i1 %3, i64 %1, i64 %2
-    ret i64 %4
+    %3 = select i1 %0, double %1, double %2
+    ret double %3
 }
 
-define double @$cond.i64.double.double(i64, double, double) {
+define i1 @$cond.i1.i1.i1(i1, i1, i1) {
 entry:
-    %3 = icmp ne i64 %0, 0
-    %4 = select i1 %3, double %1, double %2
-    ret double %4
-}
-
-define i64 @$to_i64.i64(i64) {
-entry:
-    ret i64 %0
+    %3 = select i1 %0, i1 %1, i1 %2
+    ret i1 %3
 }
 
 define i64 @$to_i64.double(double) {
 entry:
     %1 = fptosi double %0 to i64
+    ret i64 %1
+}
+
+define i64 @$to_i64.i1(i1) {
+entry:
+    %1 = zext i1 %0 to i64
     ret i64 %1
 }
 
@@ -356,7 +358,14 @@ entry:
     ret double %1
 }
 
-define double @$to_double.double(double) {
+define double @$to_double.i1(i1) {
 entry:
-    ret double %0
+    %1 = sitofp i1 %0 to double
+    ret double %1
+}
+
+define i1 @$to_i1.i64(i64) {
+entry:
+    %1 = icmp ne i64 %0, 0
+    ret i1 %1
 }
