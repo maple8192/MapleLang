@@ -38,12 +38,12 @@ class LLVMGenerator {
         code.add("entry:")
         function.variables.forEachIndexed { i, t ->
             code.add("  %${i} = alloca ${t.str}")
-            code.add("  store ${t.str} ${if (i < function.argsNum) "%arg${i}" else when (t) { Type.Int -> "0"; Type.Float -> "0.0"; Type.Void -> "" } }, ${t.str}* %${i}")
+            code.add("  store ${t.str} ${if (i < function.argsNum) "%arg${i}" else when (t) { Type.Int -> "0"; Type.Float -> "0.0"; Type.Bool -> "0"; Type.Void -> "" } }, ${t.str}* %${i}")
         }
 
         code.addAll(genStatement(function.statement, ArrayDeque(), Ref(function.variables.size), Ref(0), ArrayDeque()))
 
-        code.add("  ret ${function.returnType.str}${when (function.returnType) { Type.Int -> " 0"; Type.Float -> " 0.0"; Type.Void -> "" }}")
+        code.add("  ret ${function.returnType.str}${when (function.returnType) { Type.Int -> " 0"; Type.Float -> " 0.0"; Type.Bool -> "0"; Type.Void -> "" }}")
         code.add("}")
         code.add("")
 
@@ -79,8 +79,7 @@ class LLVMGenerator {
             is Statements.If -> {
                 val l = label.value++
                 code.addAll(genNode(statement.condition, stack, reg, label, lStack))
-                code.add("  %${reg.value} = icmp ne i64 %${stack.removeLast()}, 0")
-                code.add("  br i1 %${reg.value++}, label %then${l}, label %else${l}")
+                code.add("  br i1 %${stack.removeLast()}, label %then${l}, label %else${l}")
                 code.add("then${l}:")
                 code.addAll(genStatement(statement.trueCase, stack, reg, label, lStack))
                 code.add("  br label %end${l}")
@@ -100,8 +99,7 @@ class LLVMGenerator {
                 code.add("cond${l}:")
                 if (statement.condition != null) {
                     code.addAll(genNode(statement.condition, stack, reg, label, lStack))
-                    code.add("  %${reg.value} = icmp ne i64 %${stack.removeLast()}, 0")
-                    code.add("  br i1 %${reg.value++}, label %then${l}, label %end${l}")
+                    code.add("  br i1 %${stack.removeLast()}, label %then${l}, label %end${l}")
                 } else {
                     code.add("  br label %then${l}")
                 }
@@ -117,8 +115,7 @@ class LLVMGenerator {
                 code.add("  br label %begin${l}")
                 code.add("begin${l}:")
                 code.addAll(genNode(statement.condition, stack, reg, label, lStack))
-                code.add("  %${reg.value} = icmp i64 %${stack.removeLast()}, 0")
-                code.add("  br i1 %${reg.value++}, label %then${l}, label %end${l}")
+                code.add("  br i1 %${stack.removeLast()}, label %then${l}, label %end${l}")
                 code.add("then${l}:")
                 code.addAll(genStatement(statement.statement, stack, reg, label, lStack))
                 code.add("  br label %begin${l}")
@@ -181,13 +178,12 @@ class LLVMGenerator {
                     stack.add(reg.value++)
                 } else {
                     code.add("  call void @${node.funcName}(${genFuncCallArgs(arguments)})")
-                    code.add("  %${reg.value} = alloca i64")
-                    code.add("  store i64 0, i64* %${reg.value}")
+                    code.add("  %${reg.value} = add i64 0, 0")
                     stack.add(reg.value++)
                 }
             }
             is Node.Number -> {
-                code.add("  %${reg.value} = ${if (node.type == Type.Float) "f" else "" }add ${node.type.str} ${node.num}, ${when (node.type) { Type.Int -> "0"; Type.Float -> "0.0"; Type.Void -> "" } }")
+                code.add("  %${reg.value} = ${if (node.type == Type.Float) "f" else "" }add ${node.type.str} ${node.num}, ${when (node.type) { Type.Int -> "0"; Type.Float -> "0.0"; Type.Bool -> "0"; Type.Void -> "" } }")
                 stack.add(reg.value++)
             }
         }

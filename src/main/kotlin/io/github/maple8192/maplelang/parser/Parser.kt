@@ -17,7 +17,7 @@ import io.github.maple8192.maplelang.util.Either
 class Parser(tokenList: List<Token>) {
     private val tokens = TokenQueue(tokenList)
 
-    private val operators = listOf<Triple<String, List<Type>, Type>>(
+    private val operators = listOf(
         Triple("add", listOf(Type.Int, Type.Int), Type.Int),
         Triple("add", listOf(Type.Int, Type.Float), Type.Float),
         Triple("add", listOf(Type.Float, Type.Int), Type.Float),
@@ -74,31 +74,36 @@ class Parser(tokenList: List<Token>) {
 
         Triple("shr", listOf(Type.Int, Type.Int), Type.Int),
 
-        Triple("eq", listOf(Type.Int, Type.Int), Type.Int),
-        Triple("eq", listOf(Type.Float, Type.Float), Type.Int),
+        Triple("eq", listOf(Type.Int, Type.Int), Type.Bool),
+        Triple("eq", listOf(Type.Float, Type.Float), Type.Bool),
+        Triple("eq", listOf(Type.Bool, Type.Bool), Type.Bool),
 
-        Triple("ne", listOf(Type.Int, Type.Int), Type.Int),
-        Triple("ne", listOf(Type.Float, Type.Float), Type.Int),
+        Triple("ne", listOf(Type.Int, Type.Int), Type.Bool),
+        Triple("ne", listOf(Type.Float, Type.Float), Type.Bool),
+        Triple("ne", listOf(Type.Bool, Type.Bool), Type.Bool),
 
-        Triple("less", listOf(Type.Int, Type.Int), Type.Int),
-        Triple("less", listOf(Type.Int, Type.Float), Type.Int),
-        Triple("less", listOf(Type.Float, Type.Int), Type.Int),
-        Triple("less", listOf(Type.Float, Type.Float), Type.Int),
+        Triple("less", listOf(Type.Int, Type.Int), Type.Bool),
+        Triple("less", listOf(Type.Int, Type.Float), Type.Bool),
+        Triple("less", listOf(Type.Float, Type.Int), Type.Bool),
+        Triple("less", listOf(Type.Float, Type.Float), Type.Bool),
 
-        Triple("lnot", listOf(Type.Int), Type.Int),
+        Triple("lnot", listOf(Type.Bool), Type.Bool),
 
-        Triple("land", listOf(Type.Int, Type.Int), Type.Int),
+        Triple("land", listOf(Type.Bool, Type.Bool), Type.Bool),
 
-        Triple("lor", listOf(Type.Int, Type.Int), Type.Int),
+        Triple("lor", listOf(Type.Bool, Type.Bool), Type.Bool),
 
-        Triple("cond", listOf(Type.Int, Type.Int, Type.Int), Type.Int),
-        Triple("cond", listOf(Type.Int, Type.Float, Type.Float), Type.Float),
+        Triple("cond", listOf(Type.Bool, Type.Int, Type.Int), Type.Int),
+        Triple("cond", listOf(Type.Bool, Type.Float, Type.Float), Type.Float),
+        Triple("cond", listOf(Type.Bool, Type.Bool, Type.Bool), Type.Bool),
 
-        Triple("to_i64", listOf(Type.Int), Type.Int),
         Triple("to_i64", listOf(Type.Float), Type.Int),
+        Triple("to_i64", listOf(Type.Bool), Type.Int),
 
         Triple("to_double", listOf(Type.Int), Type.Float),
-        Triple("to_double", listOf(Type.Float), Type.Float),
+        Triple("to_double", listOf(Type.Bool), Type.Float),
+
+        Triple("to_i1", listOf(Type.Int), Type.Bool),
     )
 
     private val functions = mutableListOf<Triple<String, List<Type>, Type>>()
@@ -160,7 +165,7 @@ class Parser(tokenList: List<Token>) {
             tokens.expectSymbol(SymbolType.End)
             Statements.Break()
         } else if (tokens.consumeWord(WordType.If)) {
-            val condition = cast(Type.Int, expression(variables))
+            val condition = cast(Type.Bool, expression(variables))
             val trueCase = statement(variables)
             val falseCase = if (tokens.consumeWord(WordType.Else)) {
                 statement(variables)
@@ -179,7 +184,7 @@ class Parser(tokenList: List<Token>) {
             val condition = if (tokens.consumeSymbol(SymbolType.End)) {
                 null
             } else {
-                val expr = cast(Type.Int, expression(variables))
+                val expr = cast(Type.Bool, expression(variables))
                 tokens.expectSymbol(SymbolType.End)
                 expr
             }
@@ -193,7 +198,7 @@ class Parser(tokenList: List<Token>) {
             val statement = statement(variables)
             Statements.For(init, condition, update, statement)
         } else if (tokens.consumeWord(WordType.While)) {
-            val condition = cast(Type.Int, expression(variables))
+            val condition = cast(Type.Bool, expression(variables))
             val statement = statement(variables)
             Statements.While(condition, statement)
         } else if (tokens.consumeWord(WordType.Loop)) {
@@ -317,7 +322,7 @@ class Parser(tokenList: List<Token>) {
             val then = condition(variables)
             tokens.expectSymbol(SymbolType.CElse)
             val els = condition(variables)
-            opCall("cond", listOf(cast(Type.Int, node), then, els))
+            opCall("cond", listOf(cast(Type.Bool, node), then, els))
         } else {
             node
         }
@@ -328,7 +333,7 @@ class Parser(tokenList: List<Token>) {
 
         while (true) {
             node = if (tokens.consumeSymbol(SymbolType.LOr)) {
-                opCall("lor", listOf(cast(Type.Int, node), cast(Type.Int, and(variables))))
+                opCall("lor", listOf(cast(Type.Bool, node), cast(Type.Bool, and(variables))))
             } else {
                 return node
             }
@@ -340,7 +345,7 @@ class Parser(tokenList: List<Token>) {
 
         while (true) {
             node = if (tokens.consumeSymbol(SymbolType.LAnd)) {
-                opCall("land", listOf(cast(Type.Int, node), cast(Type.Int, bitOr(variables))))
+                opCall("land", listOf(cast(Type.Bool, node), cast(Type.Bool, bitOr(variables))))
             } else {
                 return node
             }
@@ -352,7 +357,7 @@ class Parser(tokenList: List<Token>) {
 
         while (true) {
             node = if (tokens.consumeSymbol(SymbolType.BOr)) {
-                opCall("or", listOf(cast(Type.Int, node), cast(Type.Int, bitXor(variables))))
+                opCall("or", listOf(node, bitXor(variables)))
             } else {
                 return node
             }
@@ -364,7 +369,7 @@ class Parser(tokenList: List<Token>) {
 
         while (true) {
             node = if (tokens.consumeSymbol(SymbolType.BXor)) {
-                opCall("xor", listOf(cast(Type.Int, node), cast(Type.Int, bitAnd(variables))))
+                opCall("xor", listOf(node, bitAnd(variables)))
             } else {
                 return node
             }
@@ -376,7 +381,7 @@ class Parser(tokenList: List<Token>) {
 
         while (true) {
             node = if (tokens.consumeSymbol(SymbolType.BAnd)) {
-                opCall("and", listOf(cast(Type.Int, node), cast(Type.Int, equality(variables))))
+                opCall("and", listOf(node, equality(variables)))
             } else {
                 return node
             }
@@ -420,9 +425,9 @@ class Parser(tokenList: List<Token>) {
 
         while (true) {
             node = if (tokens.consumeSymbol(SymbolType.LSft)) {
-                opCall("shl", listOf(cast(Type.Int, node), cast(Type.Int, add(variables))))
+                opCall("shl", listOf(node, add(variables)))
             } else if (tokens.consumeSymbol(SymbolType.RSft)) {
-                opCall("shr", listOf(cast(Type.Int, node), cast(Type.Int, add(variables))))
+                opCall("shr", listOf(node, add(variables)))
             } else {
                 return node
             }
@@ -475,9 +480,9 @@ class Parser(tokenList: List<Token>) {
         var node = if (tokens.consumeSymbol(SymbolType.Sub)) {
             opCall("minus", listOf(primary(variables)))
         } else if (tokens.consumeSymbol(SymbolType.BNot)) {
-            opCall("not", listOf(cast(Type.Int, primary(variables))))
+            opCall("not", listOf(primary(variables)))
         } else if (tokens.consumeSymbol(SymbolType.LNot)) {
-            opCall("lnot", listOf(cast(Type.Int, primary(variables))))
+            opCall("lnot", listOf(cast(Type.Bool, primary(variables))))
         } else {
             primary(variables)
         }
