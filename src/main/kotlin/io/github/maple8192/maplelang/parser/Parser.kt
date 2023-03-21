@@ -93,6 +93,12 @@ class Parser(tokenList: List<Token>) {
 
         it.add(Triple("op_cond", listOf(Type.Int, Type.Int, Type.Int), Type.Int))
         it.add(Triple("op_cond", listOf(Type.Int, Type.Float, Type.Float), Type.Float))
+
+        it.add(Triple("op_to_i64", listOf(Type.Int), Type.Int))
+        it.add(Triple("op_to_i64", listOf(Type.Float), Type.Int))
+
+        it.add(Triple("op_to_double", listOf(Type.Int), Type.Float))
+        it.add(Triple("op_to_double", listOf(Type.Float), Type.Float))
     }
 
     @Throws(TokenException::class)
@@ -152,7 +158,7 @@ class Parser(tokenList: List<Token>) {
             tokens.expectSymbol(SymbolType.End)
             Statements.Break()
         } else if (tokens.consumeWord(WordType.If)) {
-            val condition = expression(variables)
+            val condition = impCast(Type.Int, expression(variables))
             val trueCase = statement(variables)
             val falseCase = if (tokens.consumeWord(WordType.Else)) {
                 statement(variables)
@@ -171,7 +177,7 @@ class Parser(tokenList: List<Token>) {
             val condition = if (tokens.consumeSymbol(SymbolType.End)) {
                 null
             } else {
-                val expr = expression(variables)
+                val expr = impCast(Type.Int, expression(variables))
                 tokens.expectSymbol(SymbolType.End)
                 expr
             }
@@ -185,7 +191,7 @@ class Parser(tokenList: List<Token>) {
             val statement = statement(variables)
             Statements.For(init, condition, update, statement)
         } else if (tokens.consumeWord(WordType.While)) {
-            val condition = expression(variables)
+            val condition = impCast(Type.Int, expression(variables))
             val statement = statement(variables)
             Statements.While(condition, statement)
         } else if (tokens.consumeWord(WordType.Loop)) {
@@ -214,7 +220,7 @@ class Parser(tokenList: List<Token>) {
                 if (variables.find { it.first == varName } != null) throw TokenException(tokens.prevToken.line, tokens.prevToken.pos, "Already Exist")
                 variables.add(varName to type)
                 val node = if (tokens.consumeSymbol(SymbolType.Assign)) {
-                    Node.Assign(type, variables.indexOfFirst { it.first == varName }, exchange(variables))
+                    Node.Assign(type, variables.indexOfFirst { it.first == varName }, impCast(type, exchange(variables)))
                 } else {
                     Node.Variable(type, variables.indexOfFirst { it.first == varName })
                 }
@@ -263,37 +269,37 @@ class Parser(tokenList: List<Token>) {
 
         return if (node is Node.Variable) {
             if (tokens.consumeSymbol(SymbolType.Assign)) {
-                Node.Assign(node.type, node.offset, assign(variables))
+                Node.Assign(node.type, node.offset, impCast(node.type, assign(variables)))
             } else if (tokens.consumeSymbol(SymbolType.AAdd)) {
-                Node.Assign(node.type, node.offset, opCall("add", listOf(node, assign(variables))))
+                Node.Assign(node.type, node.offset, impCast(node.type, opCall("add", listOf(node, assign(variables)))))
             } else if (tokens.consumeSymbol(SymbolType.ASub)) {
-                Node.Assign(node.type, node.offset, opCall("sub", listOf(node, assign(variables))))
+                Node.Assign(node.type, node.offset, impCast(node.type, opCall("sub", listOf(node, assign(variables)))))
             } else if (tokens.consumeSymbol(SymbolType.AMul)) {
-                Node.Assign(node.type, node.offset, opCall("mul", listOf(node, assign(variables))))
+                Node.Assign(node.type, node.offset, impCast(node.type, opCall("mul", listOf(node, assign(variables)))))
             } else if (tokens.consumeSymbol(SymbolType.ADiv)) {
-                Node.Assign(node.type, node.offset, opCall("div", listOf(node, assign(variables))))
+                Node.Assign(node.type, node.offset, impCast(node.type, opCall("div", listOf(node, assign(variables)))))
             } else if (tokens.consumeSymbol(SymbolType.ARem)) {
-                Node.Assign(node.type, node.offset, opCall("rem", listOf(node, assign(variables))))
+                Node.Assign(node.type, node.offset, impCast(node.type, opCall("rem", listOf(node, assign(variables)))))
             } else if (tokens.consumeSymbol(SymbolType.APow)) {
-                Node.Assign(node.type, node.offset, opCall("pow", listOf(node, assign(variables))))
+                Node.Assign(node.type, node.offset, impCast(node.type, opCall("pow", listOf(node, assign(variables)))))
             } else if (tokens.consumeSymbol(SymbolType.ARoot)) {
-                Node.Assign(node.type, node.offset, opCall("root", listOf(node, assign(variables))))
+                Node.Assign(node.type, node.offset, impCast(node.type, opCall("root", listOf(node, assign(variables)))))
             } else if (tokens.consumeSymbol(SymbolType.AAnd)) {
-                Node.Assign(node.type, node.offset, opCall("and", listOf(node, assign(variables))))
+                Node.Assign(node.type, node.offset, impCast(node.type, opCall("and", listOf(node, assign(variables)))))
             } else if (tokens.consumeSymbol(SymbolType.AXor)) {
-                Node.Assign(node.type, node.offset, opCall("xor", listOf(node, assign(variables))))
+                Node.Assign(node.type, node.offset, impCast(node.type, opCall("xor", listOf(node, assign(variables)))))
             } else if (tokens.consumeSymbol(SymbolType.AOr)) {
-                Node.Assign(node.type, node.offset, opCall("or", listOf(node, assign(variables))))
+                Node.Assign(node.type, node.offset, impCast(node.type, opCall("or", listOf(node, assign(variables)))))
             } else if (tokens.consumeSymbol(SymbolType.ALSft)) {
-                Node.Assign(node.type, node.offset, opCall("shl", listOf(node, assign(variables))))
+                Node.Assign(node.type, node.offset, impCast(node.type, opCall("shl", listOf(node, assign(variables)))))
             } else if (tokens.consumeSymbol(SymbolType.ARSft)) {
-                Node.Assign(node.type, node.offset, opCall("shr", listOf(node, assign(variables))))
+                Node.Assign(node.type, node.offset, impCast(node.type, opCall("shr", listOf(node, assign(variables)))))
             } else if (tokens.consumeSymbol(SymbolType.ChMin)) {
                 val value = assign(variables)
-                Node.Assign(node.type, node.offset, opCall("cond", listOf(opCall("less", listOf(value, node)), value, node)))
+                Node.Assign(node.type, node.offset, impCast(node.type, opCall("cond", listOf(opCall("less", listOf(value, node)), value, node))))
             } else if (tokens.consumeSymbol(SymbolType.ChMax)) {
                 val value = assign(variables)
-                Node.Assign(node.type, node.offset, opCall("cond", listOf(opCall("less", listOf(node, value)), value, node)))
+                Node.Assign(node.type, node.offset, impCast(node.type, opCall("cond", listOf(opCall("less", listOf(node, value)), value, node))))
             } else {
                 node
             }
@@ -309,7 +315,7 @@ class Parser(tokenList: List<Token>) {
             val then = condition(variables)
             tokens.expectSymbol(SymbolType.CElse)
             val els = condition(variables)
-            opCall("cond", listOf(node, then, els))
+            opCall("cond", listOf(impCast(Type.Int, node), then, els))
         } else {
             node
         }
@@ -320,7 +326,7 @@ class Parser(tokenList: List<Token>) {
 
         while (true) {
             node = if (tokens.consumeSymbol(SymbolType.LOr)) {
-                opCall("lor", listOf(node, and(variables)))
+                opCall("lor", listOf(impCast(Type.Int, node), impCast(Type.Int, and(variables))))
             } else {
                 return node
             }
@@ -332,7 +338,7 @@ class Parser(tokenList: List<Token>) {
 
         while (true) {
             node = if (tokens.consumeSymbol(SymbolType.LAnd)) {
-                opCall("land", listOf(node, bitOr(variables)))
+                opCall("land", listOf(impCast(Type.Int, node), impCast(Type.Int, bitOr(variables))))
             } else {
                 return node
             }
@@ -344,7 +350,7 @@ class Parser(tokenList: List<Token>) {
 
         while (true) {
             node = if (tokens.consumeSymbol(SymbolType.BOr)) {
-                opCall("or", listOf(node, bitXor(variables)))
+                opCall("or", listOf(impCast(Type.Int, node), impCast(Type.Int, bitXor(variables))))
             } else {
                 return node
             }
@@ -356,7 +362,7 @@ class Parser(tokenList: List<Token>) {
 
         while (true) {
             node = if (tokens.consumeSymbol(SymbolType.BXor)) {
-                opCall("xor", listOf(node, bitAnd(variables)))
+                opCall("xor", listOf(impCast(Type.Int, node), impCast(Type.Int, bitAnd(variables))))
             } else {
                 return node
             }
@@ -368,7 +374,7 @@ class Parser(tokenList: List<Token>) {
 
         while (true) {
             node = if (tokens.consumeSymbol(SymbolType.BAnd)) {
-                opCall("and", listOf(node, equality(variables)))
+                opCall("and", listOf(impCast(Type.Int, node), impCast(Type.Int, equality(variables))))
             } else {
                 return node
             }
@@ -412,9 +418,9 @@ class Parser(tokenList: List<Token>) {
 
         while (true) {
             node = if (tokens.consumeSymbol(SymbolType.LSft)) {
-                opCall("shl", listOf(node, add(variables)))
+                opCall("shl", listOf(impCast(Type.Int, node), impCast(Type.Int, add(variables))))
             } else if (tokens.consumeSymbol(SymbolType.RSft)) {
-                opCall("shr", listOf(node, add(variables)))
+                opCall("shr", listOf(impCast(Type.Int, node), impCast(Type.Int, add(variables))))
             } else {
                 return node
             }
@@ -467,9 +473,9 @@ class Parser(tokenList: List<Token>) {
         return if (tokens.consumeSymbol(SymbolType.Sub)) {
             opCall("minus", listOf(primary(variables)))
         } else if (tokens.consumeSymbol(SymbolType.BNot)) {
-            opCall("not", listOf(primary(variables)))
+            opCall("not", listOf(impCast(Type.Int, primary(variables))))
         } else if (tokens.consumeSymbol(SymbolType.LNot)) {
-            opCall("lnot", listOf(primary(variables)))
+            opCall("lnot", listOf(impCast(Type.Int, primary(variables))))
         } else {
             primary(variables)
         }
@@ -508,6 +514,14 @@ class Parser(tokenList: List<Token>) {
                 is Either.Left -> Node.Number(Type.Int, num.left.toString())
                 is Either.Right -> Node.Number(Type.Float, num.right.toString())
             }
+        }
+    }
+
+    private fun impCast(type: Type, node: Node): Node {
+        return if (type == node.type) {
+            node
+        } else {
+            opCall("to_${type.str}", listOf(node))
         }
     }
 

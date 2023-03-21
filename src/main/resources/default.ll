@@ -338,3 +338,25 @@ entry:
     %4 = select i1 %3, double %1, double %2
     ret double %4
 }
+
+define i64 @$to_i64$i64(i64) {
+entry:
+    ret i64 %0
+}
+
+define i64 @$to_i64$double(double) {
+entry:
+    %1 = fptosi double %0 to i64
+    ret i64 %1
+}
+
+define double @$to_double$i64(i64) {
+entry:
+    %1 = sitofp i64 %0 to double
+    ret double %1
+}
+
+define double @$to_double$double(double) {
+entry:
+    ret double %0
+}
