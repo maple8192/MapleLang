@@ -97,6 +97,15 @@ class TokenQueue(private val tokenList: List<Token>) {
         throw TokenException(currentToken.line, currentToken.pos, "Number token expected.")
     }
 
+    fun expectString(): String {
+        val token = currentToken
+        if (token is Token.Str) {
+            index++
+            return token.str
+        }
+        throw TokenException(currentToken.line, currentToken.pos, "String token expected.")
+    }
+
     fun expectType(): Type {
         val token = currentToken
         if (token is Token.Word) {

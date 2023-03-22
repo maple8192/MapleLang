@@ -30,6 +30,11 @@ class Tokenizer(private val src: List<String>) {
                         })
                         pos += length
                     }
+                    '\"' -> {
+                        val str = createStringToken(src[line].slice(pos until src[line].length)) ?: throw TokenException(line, pos, "Close Double Quote Expected")
+                        tokens.add(Token.Str(line, pos, str))
+                        pos += str.length + 2
+                    }
                     in SymbolType.symbolChars -> {
                         val symbol = createSymbolToken(src[line].slice(pos until src[line].length)) ?: throw TokenException(line, pos, "Undefined Token")
                         tokens.add(Token.Symbol(line, pos, symbol))
@@ -70,6 +75,16 @@ class Tokenizer(private val src: List<String>) {
             }
         }
         return (if (dot) Either.Right(str.toDouble()) else Either.Left(str.toLong())) to str.length
+    }
+
+    private fun createStringToken(str: String): String? {
+        val s = str.drop(1)
+        for (i in s.indices) {
+            if (s[i] == '\"') {
+                return s.slice(0 until i)
+            }
+        }
+        return null
     }
 
     private fun createSymbolToken(str: String): SymbolType? {

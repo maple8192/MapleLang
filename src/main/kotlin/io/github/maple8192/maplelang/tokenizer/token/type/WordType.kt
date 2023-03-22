@@ -5,6 +5,7 @@ package io.github.maple8192.maplelang.tokenizer.token.type
  */
 enum class WordType(val word: String) {
     Func("fn"),
+    LLVM("__inline_LLVM__"),
     If("if"),
     Else("else"),
     For("for"),

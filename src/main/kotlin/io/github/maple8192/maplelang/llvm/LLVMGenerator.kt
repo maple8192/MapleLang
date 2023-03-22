@@ -34,18 +34,33 @@ class LLVMGenerator {
     private fun genFunction(function: Function): List<String> {
         val code = mutableListOf<String>()
 
-        code.add("define ${function.returnType.str} @${function.name}${funcArgs(function.variables.take(function.argsNum))}(${genFuncArgs(function.variables.take(function.argsNum))}) {")
-        code.add("entry:")
-        function.variables.forEachIndexed { i, t ->
-            code.add("  %${i} = alloca ${t.str}")
-            code.add("  store ${t.str} ${if (i < function.argsNum) "%arg${i}" else when (t) { Type.Int -> "0"; Type.Float -> "0.0"; Type.Bool -> "0"; Type.Void -> "" } }, ${t.str}* %${i}")
+        when (function) {
+            is Function.Normal -> {
+                code.add("define ${function.returnType.str} @${function.name}${funcArgs(function.variables.take(function.argsNum))}(${genFuncArgs(function.variables.take(function.argsNum), true)}) {")
+                code.add("entry:")
+                function.variables.forEachIndexed { i, t ->
+                    code.add("  %${i} = alloca ${t.str}")
+                    code.add("  store ${t.str} ${if (i < function.argsNum) "%arg${i}" else when (t) { Type.Int -> "0"; Type.Float -> "0.0"; Type.Bool -> "0"; Type.Void -> "" } }, ${t.str}* %${i}")
+                }
+
+                code.addAll(genStatement(function.statement, ArrayDeque(), Ref(function.variables.size), Ref(0), ArrayDeque()))
+
+                code.add("  ret ${function.returnType.str}${when (function.returnType) { Type.Int -> " 0"; Type.Float -> " 0.0"; Type.Bool -> "0"; Type.Void -> "" }}")
+                code.add("}")
+                code.add("")
+            }
+            is Function.LLVM -> {
+                code.add("define ${function.returnType.str} @${function.name}${funcArgs(function.args)}(${genFuncArgs(function.args, false)}) {")
+
+                function.lines.forEach {
+                    code.add(it)
+                }
+
+                code.add("  ret ${function.returnType.str}${when (function.returnType) { Type.Int -> " 0"; Type.Float -> " 0.0"; Type.Bool -> "0"; Type.Void -> "" }}")
+                code.add("}")
+                code.add("")
+            }
         }
-
-        code.addAll(genStatement(function.statement, ArrayDeque(), Ref(function.variables.size), Ref(0), ArrayDeque()))
-
-        code.add("  ret ${function.returnType.str}${when (function.returnType) { Type.Int -> " 0"; Type.Float -> " 0.0"; Type.Bool -> "0"; Type.Void -> "" }}")
-        code.add("}")
-        code.add("")
 
         return code
     }
@@ -191,14 +206,14 @@ class LLVMGenerator {
         return code
     }
 
-    private fun genFuncArgs(args: List<Type>): String {
+    private fun genFuncArgs(args: List<Type>, genName: Boolean): String {
         val code = StringBuilder()
         var first = true
         for (i in args.indices) {
             if (!first) code.append(", ")
             first = false
 
-            code.append("${args[i].str} %arg${i}")
+            code.append("${args[i].str}${if (genName) " %arg${i}" else ""}")
         }
         return code.toString()
     }

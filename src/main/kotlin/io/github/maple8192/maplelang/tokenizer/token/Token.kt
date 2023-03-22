@@ -15,5 +15,6 @@ sealed class Token {
     class Ident(override val line: Int, override val pos: Int, val ident: String) : Token()
     class IntNum(override val line: Int, override val pos: Int, val num: Long) : Token()
     class FltNum(override val line: Int, override val pos: Int, val num: Double) : Token()
+    class Str(override val line: Int, override val pos: Int, val str: String) : Token()
     class Eof(override val line: Int, override val pos: Int) : Token()
 }
