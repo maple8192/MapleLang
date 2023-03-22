@@ -33,12 +33,12 @@ class LLVMGenerator {
                 code.add("entry:")
                 function.variables.forEachIndexed { i, t ->
                     code.add("  %${i} = alloca ${t.str}")
-                    code.add("  store ${t.str} ${if (i < function.argsNum) "%arg${i}" else when (t) { Type.Int -> "0"; Type.Float -> "0.0"; Type.Bool -> "0"; Type.Void -> "" } }, ${t.str}* %${i}")
+                    code.add("  store ${t.str} ${if (i < function.argsNum) "%arg${i}" else when (t) { Type.Int -> "0"; Type.Float -> "0.0"; Type.Bool -> " 0"; Type.Void -> "" } }, ${t.str}* %${i}")
                 }
 
                 code.addAll(genStatement(function.statement, ArrayDeque(), Ref(function.variables.size), Ref(0), ArrayDeque()))
 
-                code.add("  ret ${function.returnType.str}${when (function.returnType) { Type.Int -> " 0"; Type.Float -> " 0.0"; Type.Bool -> "0"; Type.Void -> "" }}")
+                code.add("  ret ${function.returnType.str}${when (function.returnType) { Type.Int -> " 0"; Type.Float -> " 0.0"; Type.Bool -> " 0"; Type.Void -> "" }}")
                 code.add("}")
                 code.add("")
             }
@@ -49,7 +49,7 @@ class LLVMGenerator {
                     code.add(it)
                 }
 
-                code.add("  ret ${function.returnType.str}${when (function.returnType) { Type.Int -> " 0"; Type.Float -> " 0.0"; Type.Bool -> "0"; Type.Void -> "" }}")
+                code.add("  ret ${function.returnType.str}${when (function.returnType) { Type.Int -> " 0"; Type.Float -> " 0.0"; Type.Bool -> " 0"; Type.Void -> "" }}")
                 code.add("}")
                 code.add("")
             }

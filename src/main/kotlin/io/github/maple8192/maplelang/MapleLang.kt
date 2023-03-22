@@ -34,7 +34,7 @@ fun main(args: Array<String>) {
         tokenizer.tokenize()
     } catch (ex: TokenException) {
         println("Error. (${ex.line + 1}:(${ex.pos + 1})")
-        println(src[ex.line])
+        println(addedSrc[ex.line])
         print(" ".repeat(ex.pos))
         println("^ ${ex.message}")
         return
@@ -46,7 +46,7 @@ fun main(args: Array<String>) {
         parser.parse()
     } catch (ex: TokenException) {
         println("Syntax Error. (${ex.line + 1}:${ex.pos + 1})")
-        println(src[ex.line])
+        println(addedSrc[ex.line])
         print(" ".repeat(ex.pos))
         println("^ ${ex.message}")
         return
