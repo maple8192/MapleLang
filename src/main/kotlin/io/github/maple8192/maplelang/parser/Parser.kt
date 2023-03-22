@@ -145,11 +145,20 @@ class Parser(tokenList: List<Token>) {
         val retType = tokens.consumeType() ?: Type.Void
         if (!functions.contains(Triple(funcName, args.toList(), retType))) functions.add(Triple(funcName, args.toList(), retType))
 
-        return if (tokens.consumeSymbol(SymbolType.End)) {
+        return if (tokens.consumeWord(WordType.LLVM)) {
+            tokens.expectSymbol(SymbolType.OBrace)
+
+            val lines = mutableListOf<String>()
+            while (!tokens.consumeSymbol(SymbolType.CBrace)) {
+                lines.add(tokens.expectString())
+            }
+
+            Function.LLVM(funcName, args.size, variables.map { it.second }, retType, lines.toList())
+        } else if (tokens.consumeSymbol(SymbolType.End)) {
             null
         } else {
             val statement = statement(variables)
-            Function(funcName, args.size, variables.map { it.second }, retType, statement)
+            Function.Normal(funcName, args.size, variables.map { it.second }, retType, statement)
         }
     }
 
