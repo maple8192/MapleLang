@@ -17,13 +17,6 @@ class LLVMGenerator {
     fun generate(program: Program): List<String> {
         val code = mutableListOf<String>()
 
-        try {
-            code.addAll(this.javaClass.classLoader.getResourceAsStream("default.ll")!!.bufferedReader().use { it.readLines() })
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-        }
-        code.add("")
-
         for (function in program.functions) {
             code.addAll(genFunction(function))
         }
@@ -231,6 +224,6 @@ class LLVMGenerator {
     }
 
     private fun funcArgs(args: List<Type>): String {
-        return args.joinToString { ".${it.str}" }
+        return args.joinToString(separator = "") { ".${it.str}" }
     }
 }
