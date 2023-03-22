@@ -17,95 +17,6 @@ import io.github.maple8192.maplelang.util.Either
 class Parser(tokenList: List<Token>) {
     private val tokens = TokenQueue(tokenList)
 
-    private val operators = listOf(
-        Triple("add", listOf(Type.Int, Type.Int), Type.Int),
-        Triple("add", listOf(Type.Int, Type.Float), Type.Float),
-        Triple("add", listOf(Type.Float, Type.Int), Type.Float),
-        Triple("add", listOf(Type.Float, Type.Float), Type.Float),
-
-        Triple("sub", listOf(Type.Int, Type.Int), Type.Int),
-        Triple("sub", listOf(Type.Int, Type.Float), Type.Float),
-        Triple("sub", listOf(Type.Float, Type.Int), Type.Float),
-        Triple("sub", listOf(Type.Float, Type.Float), Type.Float),
-
-        Triple("mul", listOf(Type.Int, Type.Int), Type.Int),
-        Triple("mul", listOf(Type.Int, Type.Float), Type.Float),
-        Triple("mul", listOf(Type.Float, Type.Int), Type.Float),
-        Triple("mul", listOf(Type.Float, Type.Float), Type.Float),
-
-        Triple("div", listOf(Type.Int, Type.Int), Type.Int),
-        Triple("div", listOf(Type.Int, Type.Float), Type.Float),
-        Triple("div", listOf(Type.Float, Type.Int), Type.Float),
-        Triple("div", listOf(Type.Float, Type.Float), Type.Float),
-
-        Triple("rem", listOf(Type.Int, Type.Int), Type.Int),
-        Triple("rem", listOf(Type.Int, Type.Float), Type.Float),
-        Triple("rem", listOf(Type.Float, Type.Int), Type.Float),
-        Triple("rem", listOf(Type.Float, Type.Float), Type.Float),
-
-        Triple("minus", listOf(Type.Int), Type.Int),
-        Triple("minus", listOf(Type.Float), Type.Float),
-
-        Triple("inc", listOf(Type.Int), Type.Int),
-        Triple("inc", listOf(Type.Float), Type.Float),
-
-        Triple("dec", listOf(Type.Int), Type.Int),
-        Triple("dec", listOf(Type.Float), Type.Float),
-
-        Triple("pow", listOf(Type.Int, Type.Int), Type.Int),
-        Triple("pow", listOf(Type.Int, Type.Float), Type.Float),
-        Triple("pow", listOf(Type.Float, Type.Int), Type.Float),
-        Triple("pow", listOf(Type.Float, Type.Float), Type.Float),
-
-        Triple("root", listOf(Type.Int, Type.Int), Type.Int),
-        Triple("root", listOf(Type.Int, Type.Float), Type.Float),
-        Triple("root", listOf(Type.Float, Type.Int), Type.Float),
-        Triple("root", listOf(Type.Float, Type.Float), Type.Float),
-
-        Triple("not", listOf(Type.Int), Type.Int),
-
-        Triple("and", listOf(Type.Int, Type.Int), Type.Int),
-
-        Triple("xor", listOf(Type.Int, Type.Int), Type.Int),
-
-        Triple("or", listOf(Type.Int, Type.Int), Type.Int),
-
-        Triple("shl", listOf(Type.Int, Type.Int), Type.Int),
-
-        Triple("shr", listOf(Type.Int, Type.Int), Type.Int),
-
-        Triple("eq", listOf(Type.Int, Type.Int), Type.Bool),
-        Triple("eq", listOf(Type.Float, Type.Float), Type.Bool),
-        Triple("eq", listOf(Type.Bool, Type.Bool), Type.Bool),
-
-        Triple("ne", listOf(Type.Int, Type.Int), Type.Bool),
-        Triple("ne", listOf(Type.Float, Type.Float), Type.Bool),
-        Triple("ne", listOf(Type.Bool, Type.Bool), Type.Bool),
-
-        Triple("less", listOf(Type.Int, Type.Int), Type.Bool),
-        Triple("less", listOf(Type.Int, Type.Float), Type.Bool),
-        Triple("less", listOf(Type.Float, Type.Int), Type.Bool),
-        Triple("less", listOf(Type.Float, Type.Float), Type.Bool),
-
-        Triple("lnot", listOf(Type.Bool), Type.Bool),
-
-        Triple("land", listOf(Type.Bool, Type.Bool), Type.Bool),
-
-        Triple("lor", listOf(Type.Bool, Type.Bool), Type.Bool),
-
-        Triple("cond", listOf(Type.Bool, Type.Int, Type.Int), Type.Int),
-        Triple("cond", listOf(Type.Bool, Type.Float, Type.Float), Type.Float),
-        Triple("cond", listOf(Type.Bool, Type.Bool, Type.Bool), Type.Bool),
-
-        Triple("to_i64", listOf(Type.Float), Type.Int),
-        Triple("to_i64", listOf(Type.Bool), Type.Int),
-
-        Triple("to_double", listOf(Type.Int), Type.Float),
-        Triple("to_double", listOf(Type.Bool), Type.Float),
-
-        Triple("to_i1", listOf(Type.Int), Type.Bool),
-    )
-
     private val functions = mutableListOf<Triple<String, List<Type>, Type>>()
 
     @Throws(TokenException::class)
@@ -126,6 +37,7 @@ class Parser(tokenList: List<Token>) {
 
     private fun function(): Function? {
         tokens.expectWord(WordType.Func)
+        val op = tokens.consumeWord(WordType.Operator)
         val funcName = tokens.expectIdent()
         val variables = mutableListOf<Pair<String, Type>>()
         val args = mutableListOf<Type>()
@@ -143,7 +55,7 @@ class Parser(tokenList: List<Token>) {
             }
         }
         val retType = tokens.consumeType() ?: Type.Void
-        if (!functions.contains(Triple(funcName, args.toList(), retType))) functions.add(Triple(funcName, args.toList(), retType))
+        if (!functions.contains(Triple("${if (op) "$" else ""}$funcName", args.toList(), retType))) functions.add(Triple("${if (op) "$" else ""}$funcName", args.toList(), retType))
 
         return if (tokens.consumeWord(WordType.LLVM)) {
             tokens.expectSymbol(SymbolType.OBrace)
@@ -153,12 +65,12 @@ class Parser(tokenList: List<Token>) {
                 lines.add(tokens.expectString())
             }
 
-            Function.LLVM(funcName, args.size, variables.map { it.second }, retType, lines.toList())
+            Function.LLVM("${if (op) "$" else ""}$funcName", args.size, variables.map { it.second }, retType, lines.toList())
         } else if (tokens.consumeSymbol(SymbolType.End)) {
             null
         } else {
             val statement = statement(variables)
-            Function.Normal(funcName, args.size, variables.map { it.second }, retType, statement)
+            Function.Normal("${if (op) "$" else ""}$funcName", args.size, variables.map { it.second }, retType, statement)
         }
     }
 
@@ -555,7 +467,7 @@ class Parser(tokenList: List<Token>) {
     }
 
     private fun opCall(name: String, args: List<Node>): Node.FnCall {
-        return Node.FnCall(operators.find { it.first == name && it.second == args.map { arg -> arg.type } }?.third ?: throw TokenException(tokens.prevToken.line, tokens.prevToken.pos, "Undefined Operator"), "$${name}${funcArgs(args)}", args)
+        return Node.FnCall(functions.find { it.first == "$$name" && it.second == args.map { arg -> arg.type } }?.third ?: throw TokenException(tokens.prevToken.line, tokens.prevToken.pos, "Undefined Operator"), "$${name}${funcArgs(args)}", args)
     }
 
     private fun funcCall(name: String, args: List<Node>): Node.FnCall {

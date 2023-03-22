@@ -17,13 +17,6 @@ class LLVMGenerator {
     fun generate(program: Program): List<String> {
         val code = mutableListOf<String>()
 
-        try {
-            code.addAll(this.javaClass.classLoader.getResourceAsStream("default.ll")!!.bufferedReader().use { it.readLines() })
-        } catch (ex: Exception) {
-            ex.printStackTrace()
-        }
-        code.add("")
-
         for (function in program.functions) {
             code.addAll(genFunction(function))
         }
@@ -40,12 +33,12 @@ class LLVMGenerator {
                 code.add("entry:")
                 function.variables.forEachIndexed { i, t ->
                     code.add("  %${i} = alloca ${t.str}")
-                    code.add("  store ${t.str} ${if (i < function.argsNum) "%arg${i}" else when (t) { Type.Int -> "0"; Type.Float -> "0.0"; Type.Bool -> "0"; Type.Void -> "" } }, ${t.str}* %${i}")
+                    code.add("  store ${t.str} ${if (i < function.argsNum) "%arg${i}" else when (t) { Type.Int -> "0"; Type.Float -> "0.0"; Type.Bool -> " 0"; Type.Void -> "" } }, ${t.str}* %${i}")
                 }
 
                 code.addAll(genStatement(function.statement, ArrayDeque(), Ref(function.variables.size), Ref(0), ArrayDeque()))
 
-                code.add("  ret ${function.returnType.str}${when (function.returnType) { Type.Int -> " 0"; Type.Float -> " 0.0"; Type.Bool -> "0"; Type.Void -> "" }}")
+                code.add("  ret ${function.returnType.str}${when (function.returnType) { Type.Int -> " 0"; Type.Float -> " 0.0"; Type.Bool -> " 0"; Type.Void -> "" }}")
                 code.add("}")
                 code.add("")
             }
@@ -56,7 +49,7 @@ class LLVMGenerator {
                     code.add(it)
                 }
 
-                code.add("  ret ${function.returnType.str}${when (function.returnType) { Type.Int -> " 0"; Type.Float -> " 0.0"; Type.Bool -> "0"; Type.Void -> "" }}")
+                code.add("  ret ${function.returnType.str}${when (function.returnType) { Type.Int -> " 0"; Type.Float -> " 0.0"; Type.Bool -> " 0"; Type.Void -> "" }}")
                 code.add("}")
                 code.add("")
             }
@@ -231,6 +224,6 @@ class LLVMGenerator {
     }
 
     private fun funcArgs(args: List<Type>): String {
-        return args.joinToString { ".${it.str}" }
+        return args.joinToString(separator = "") { ".${it.str}" }
     }
 }

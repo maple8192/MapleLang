@@ -46,6 +46,7 @@ class TokenQueue(private val tokenList: List<Token>) {
             val type = when (token.type) {
                 WordType.Int -> Type.Int
                 WordType.Float -> Type.Float
+                WordType.Bool -> Type.Bool
                 else -> return null
             }
             index++
@@ -112,6 +113,7 @@ class TokenQueue(private val tokenList: List<Token>) {
             val type = when (token.type) {
                 WordType.Int -> Type.Int
                 WordType.Float -> Type.Float
+                WordType.Bool -> Type.Bool
                 else -> throw TokenException(currentToken.line, currentToken.pos, "Type token expected.")
             }
             index++
